@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>exorvirtualkeyboard.qml</file>
+        <file>exorim.qml</file>
+    </qresource>
+</RCC>

@@ -1,5 +1,6 @@
-# EXOR Qt Virtual Keyboard
+# Exor QT VirtualKeyboard
 
-Placeholder for QtVirtualKeyboard project
+This application creates a virtual keyboard compliant with Weston keyboard sample,
+based on QtVirtualKeyboard plugin.
 
 
