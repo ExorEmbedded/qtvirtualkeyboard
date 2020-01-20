@@ -6,7 +6,8 @@ TEMPLATE = lib
 CONFIG += plugin
 
 
-SOURCES += inputpanelshellplugin.cpp \
+SOURCES += wayland-input-method-unstable-v1-protocol.c \
+           inputpanelshellplugin.cpp \
            qwaylandinputpanelshellintegration.cpp \
            qwaylandinputpanelsurface.cpp \
            qwayland-input-method-unstable-v1.cpp
