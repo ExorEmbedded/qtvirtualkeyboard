@@ -2,6 +2,7 @@
 //#include <QDesktopWidget>
 #include <QQmlEngine>
 
+#include "exorkeyboardsettings.h"
 #include "exorvirtualkeyboard.h"
 
 int main(int argc, char *argv[])
@@ -15,7 +16,10 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     /* Keyboard backend */
-    ExorVirtualKeyboard wvk;
+    qmlRegisterSingletonType<ExorKeyboardSettings>("com.exor.Keyboard", 1, 0, "Settings",
+                             ExorKeyboardSettings::exorKeyboardSettingsProvider);
+
+    ExorVirtualKeyboard evk;
 
     /* Configure keyboard (initial) settings here */
 

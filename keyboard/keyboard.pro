@@ -21,11 +21,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        exorkeyboardsettings.cpp \
         exorvirtualkeyboard.cpp \
         input-method-unstable-v1_p.c \
         main.cpp
 
 HEADERS += \
+        exorkeyboardsettings.h \
         exorvirtualkeyboard.h \
         input-method-unstable-v1.h \
         text-input-unstable-v1.h
