@@ -1,11 +1,8 @@
-#include "exorvirtualkeyboard.h"
+#include "exorkeyboardwayland.h"
 
 #include <QObject>
 #include <QGuiApplication>
-#include <QQmlEngine>
-#include <QQmlContext>
 #include <QDebug>
-#include <QScreen>
 #include <xkbcommon/xkbcommon.h>
 #include <time.h>
 
@@ -64,8 +61,8 @@ append(char *s1, const char *s2)
 /*
  * Callbacks for Wayland InputMethod Context.
  *
- * Each will redirect to correspoding method in ExorVirtualKeyboard.
- * (Static cast from @data to ExorVirtualKeyboard).
+ * Each will redirect to correspoding method in ExorKeyboardWayland.
+ * (Static cast from @data to ExorKeyboardWayland).
  */
 static void
 input_context_handle_surrounding_text(void *data,
@@ -74,16 +71,16 @@ input_context_handle_surrounding_text(void *data,
                         uint32_t cursor,
                         uint32_t anchor)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->inputContextHandleSurroundingText(context, text, cursor, anchor);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->inputContextHandleSurroundingText(context, text, cursor, anchor);
 }
 
 static void
 input_context_handle_reset(void *data,
              struct zwp_input_method_context_v1 *context)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->inputContextHandleReset(context);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->inputContextHandleReset(context);
 }
 
 static void
@@ -92,8 +89,8 @@ input_context_handle_content_type(void *data,
                     uint32_t hint,
                     uint32_t purpose)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->inputContextHandleContentType(context, hint, purpose);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->inputContextHandleContentType(context, hint, purpose);
 }
 
 static void
@@ -102,8 +99,8 @@ input_context_handle_invoke_action(void *data,
                      uint32_t button,
                      uint32_t index)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->inputContextHandleInvokeAction(context, button, index);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->inputContextHandleInvokeAction(context, button, index);
 }
 
 static void
@@ -111,8 +108,8 @@ input_context_handle_commit_state(void *data,
                     struct zwp_input_method_context_v1 *context,
                     uint32_t serial)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->inputContextHandleCommitState(context, serial);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->inputContextHandleCommitState(context, serial);
 }
 
 static void
@@ -120,8 +117,8 @@ input_context_handle_preferred_language(void *data,
                           struct zwp_input_method_context_v1 *context,
                           const char *language)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->inputContextHandlePreferredLanguage(context, language);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->inputContextHandlePreferredLanguage(context, language);
 }
 
 /*
@@ -141,15 +138,15 @@ static const struct zwp_input_method_context_v1_listener input_method_context_li
 /* ************************************************************** */
 
 /* Input Method listener callbacks.
- * Each will redirect to correspoding method in ExorVirtualKeyboard.
+ * Each will redirect to correspoding method in ExorKeyboardWayland.
  */
 static void
 input_method_handle_activate(void *data,
                       struct zwp_input_method_v1 *input_method,
                       struct zwp_input_method_context_v1 *context)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->inputMethodHandleActivate(input_method, context);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->inputMethodHandleActivate(input_method, context);
 }
 
 static void
@@ -157,8 +154,8 @@ input_method_handle_deactivate(void *data,
                         struct zwp_input_method_v1 *input_method,
                         struct zwp_input_method_context_v1 *context)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->inputMethodHandleDeactivate(input_method, context);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->inputMethodHandleDeactivate(input_method, context);
 }
 
 static const struct zwp_input_method_v1_listener input_method_listener = {
@@ -174,8 +171,8 @@ static void global_handler(void *data,
                            struct wl_registry *wl_registry, uint32_t name,
                            const char *interface, uint32_t version)
 {
-    ExorVirtualKeyboard *evk = static_cast<ExorVirtualKeyboard*>(data);
-    evk->globalHandler(wl_registry, name, interface, version);
+    ExorKeyboardWayland *ekw = static_cast<ExorKeyboardWayland*>(data);
+    ekw->globalHandler(wl_registry, name, interface, version);
 }
 
 static void global_remove_handler(void *,
@@ -190,34 +187,45 @@ static struct wl_registry_listener registry_listener = {
 };
 
 
+/* Provider for Singleton type */
+ExorKeyboardWayland* ExorKeyboardWayland::getInstance()
+{
+    static ExorKeyboardWayland *exorKeyboardSettings = NULL;
 
-ExorVirtualKeyboard::ExorVirtualKeyboard():
-    QQuickView(),
+    if (!exorKeyboardSettings)
+    {
+        exorKeyboardSettings = new ExorKeyboardWayland();
+    }
+
+    return exorKeyboardSettings;
+}
+
+QObject * ExorKeyboardWayland::exorKeyboardWaylandProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+    return static_cast<QObject *>(ExorKeyboardWayland::getInstance());
+}
+
+
+ExorKeyboardWayland::ExorKeyboardWayland(QObject *parent) :
+    QObject(parent),
     m_input_method(NULL),
     m_context(NULL),
+    m_contextIsActive(false),
     mk_language("en"),
     mk_text_direction(ZWP_TEXT_INPUT_V1_TEXT_DIRECTION_LTR)
 {
     /* Init */
     waylandConnect();
-    initGUI();
-
-    /* Register QML code backed.
-     * It is used to report back keyEvents from InputMethod. */
-    QQmlEngine *const engine(this->engine());
-    engine->rootContext()->setContextProperty("ExorVirtualKeyboard", this);
 
     /* InputMethod context status  */
     m_preedit_string = strdup("");
     m_preferred_language = strdup(mk_language.c_str());
 }
 
-ExorVirtualKeyboard::~ExorVirtualKeyboard()
-{
 
-}
-
-void ExorVirtualKeyboard::globalHandler(struct wl_registry *wl_registry, uint32_t name,
+void ExorKeyboardWayland::globalHandler(struct wl_registry *wl_registry, uint32_t name,
                                      const char *interface, uint32_t version)
 {
     qDebug() << "Wayland: interface [" << name << "] " << interface << " (v" << version << ")";
@@ -239,7 +247,7 @@ void ExorVirtualKeyboard::globalHandler(struct wl_registry *wl_registry, uint32_
     }
 }
 
-void ExorVirtualKeyboard::inputMethodHandleActivate(struct zwp_input_method_v1 *,
+void ExorKeyboardWayland::inputMethodHandleActivate(struct zwp_input_method_v1 *,
                                            struct zwp_input_method_context_v1 *context)
 {
     qDebug() << "Input method activation request";
@@ -276,17 +284,22 @@ void ExorVirtualKeyboard::inputMethodHandleActivate(struct zwp_input_method_v1 *
                                                m_serial,
                                                mk_text_direction);
 
-    showKeyboard();
+    /* Change activation status -will notify with signal- */
+    activateContext(true);
 }
 
-void ExorVirtualKeyboard::inputMethodHandleDeactivate(struct zwp_input_method_v1 *,
+
+void ExorKeyboardWayland::inputMethodHandleDeactivate(struct zwp_input_method_v1 *,
                                              struct zwp_input_method_context_v1 *)
 {
     qDebug() << "Input method deactivation request";
-    hideKeyboard();
+
+    /* Change activation status -will notify with signal- */
+    activateContext(false);
 }
 
-void ExorVirtualKeyboard::inputContextHandlePreferredLanguage(struct zwp_input_method_context_v1 *,
+
+void ExorKeyboardWayland::inputContextHandlePreferredLanguage(struct zwp_input_method_context_v1 *,
                                                const char *language)
 {
     if (m_preferred_language)
@@ -299,7 +312,8 @@ void ExorVirtualKeyboard::inputContextHandlePreferredLanguage(struct zwp_input_m
     /* Will report to QtVirtualKeyboard configuration */
 }
 
-void ExorVirtualKeyboard::inputContextHandleCommitState(struct zwp_input_method_context_v1 *,
+
+void ExorKeyboardWayland::inputContextHandleCommitState(struct zwp_input_method_context_v1 *,
                                          uint32_t serial)
 {
     m_serial = serial;
@@ -316,7 +330,8 @@ void ExorVirtualKeyboard::inputContextHandleCommitState(struct zwp_input_method_
                                                mk_text_direction);
 }
 
-void ExorVirtualKeyboard::inputContextHandleReset(struct zwp_input_method_context_v1 *)
+
+void ExorKeyboardWayland::inputContextHandleReset(struct zwp_input_method_context_v1 *)
 {
     if (strlen(m_preedit_string)) {
         free(m_preedit_string);
@@ -324,7 +339,8 @@ void ExorVirtualKeyboard::inputContextHandleReset(struct zwp_input_method_contex
     }
 }
 
-void ExorVirtualKeyboard::inputContextHandleContentType(struct zwp_input_method_context_v1 *,
+
+void ExorKeyboardWayland::inputContextHandleContentType(struct zwp_input_method_context_v1 *,
                                          uint32_t hint, uint32_t purpose)
 {
     m_content_hint = hint;
@@ -333,13 +349,15 @@ void ExorVirtualKeyboard::inputContextHandleContentType(struct zwp_input_method_
     /* Will report to QtVirtualKeyboard configuration */
 }
 
-void ExorVirtualKeyboard::inputContextHandleInvokeAction(struct zwp_input_method_context_v1 *,
+
+void ExorKeyboardWayland::inputContextHandleInvokeAction(struct zwp_input_method_context_v1 *,
                                           uint32_t , uint32_t index)
 {
     sendPreedit(index);
 }
 
-void ExorVirtualKeyboard::inputContextHandleSurroundingText(struct zwp_input_method_context_v1 *,
+
+void ExorKeyboardWayland::inputContextHandleSurroundingText(struct zwp_input_method_context_v1 *,
                                              const char *text, uint32_t cursor, uint32_t )
 {
     free(m_surrounding_text);
@@ -348,7 +366,7 @@ void ExorVirtualKeyboard::inputContextHandleSurroundingText(struct zwp_input_met
 }
 
 
-void ExorVirtualKeyboard::commitPreedit()
+void ExorKeyboardWayland::commitPreedit()
 {
     char *surrounding_text;
 
@@ -379,8 +397,7 @@ void ExorVirtualKeyboard::commitPreedit()
 }
 
 
-
-void ExorVirtualKeyboard::sendPreedit(int32_t cursor)
+void ExorKeyboardWayland::sendPreedit(int32_t cursor)
 {
     uint32_t index = strlen(m_preedit_string);
 
@@ -400,7 +417,8 @@ void ExorVirtualKeyboard::sendPreedit(int32_t cursor)
                                                m_preedit_string);
 }
 
-void ExorVirtualKeyboard::deleteBeforeCursor()
+
+void ExorKeyboardWayland::deleteBeforeCursor()
 {
     /* May need QString */
     const char *start, *end;
@@ -434,45 +452,6 @@ void ExorVirtualKeyboard::deleteBeforeCursor()
 }
 
 
-
-void ExorVirtualKeyboard::showKeyboard()
-{
-    /* Display keyboard */
-    show();
-
-    /* Unlikely */
-    if (!m_inputPanel) {
-        qDebug() << "showKeyboard error: no panel.";
-        return;
-    }
-
-    /*
-     * Retrieve InputPanel area
-     * Prevent window area outside InputPanel to get events
-     */
-    int x = m_inputPanel->property("x").toInt();
-    int y = m_inputPanel->property("y").toInt();
-    int width = m_inputPanel->property("width").toInt();
-    int height = m_inputPanel->property("height").toInt();
-
-    setMask(QRegion(x,y,width,height));
-}
-
-void ExorVirtualKeyboard::hideKeyboard()
-{
-    /* Unlikely */
-    if (!m_inputPanel) {
-        qDebug() << "hideKeyboard error: no panel.";
-        return;
-    }
-
-    /* Reset mask */
-    setMask(QRegion());
-
-    /* Hide keyboard */
-    hide();
-}
-
 /*
  * This method will report back to compositor key event information.
  * Changes:
@@ -481,7 +460,7 @@ void ExorVirtualKeyboard::hideKeyboard()
  * - mod_mask will be applied from shift state from Qt VirtualKeyboard.
  *
  */
-bool ExorVirtualKeyboard::keyEvent(Qt::Key key, const QString &text, Qt::KeyboardModifiers modifiers)
+bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::KeyboardModifiers modifiers)
 {
     Q_UNUSED(modifiers)
 
@@ -573,7 +552,7 @@ bool ExorVirtualKeyboard::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
 }
 
 /* Wayland connection */
-void ExorVirtualKeyboard::waylandConnect()
+void ExorKeyboardWayland::waylandConnect()
 {
     QPlatformNativeInterface *native = NULL;
     struct wl_display *display = NULL;
@@ -604,41 +583,11 @@ void ExorVirtualKeyboard::waylandConnect()
     wl_display_roundtrip(display);
 }
 
-/* GUI  */
-void ExorVirtualKeyboard::initGUI()
-{
-    /* QWindow customization */
-    setFlags(Qt::Window | Qt::FramelessWindowHint
-        | Qt::WindowStaysOnTopHint /*| Qt::WindowDoesNotAcceptFocus*/);
+ void ExorKeyboardWayland::activateContext(bool active)
+ {
+     if (m_contextIsActive == active)
+         return;
 
-    //setWindowState(Qt::WindowNoState);
-
-    /* QWindow - Background */
-    QSurfaceFormat format = this->format();
-    format.setAlphaBufferSize(8);
-    setFormat(format);
-    setColor(QColor(Qt::transparent));
-
-    /*
-     * QWindow - Occupy entire available surface
-     * (Wayland InputPanelSurface will slide bottom-up)
-     */
-    setGeometry(qGuiApp->primaryScreen()->geometry());
-    setResizeMode(QQuickView::SizeRootObjectToView);
-
-    /* QQuickView content */
-    const QUrl url(QStringLiteral("qrc:/exorvirtualkeyboard.qml"));
-    setSource(url);
-
-    /* Render to initialize panel, then hide */
-    show();
-
-    if (!m_inputPanel) {
-        m_inputPanel = findChild<QObject*>("inputPanel");
-    }
-
-    /* Set Exor InputMethod as default IM */
-    QObject *exorIMHandler = findChild<QObject*>("exorIMHandler");
-    QMetaObject::invokeMethod(exorIMHandler, "setCustomInputMethod");
-    hide();
-}
+     m_contextIsActive = active;
+     emit activationChanged(m_contextIsActive);
+ }

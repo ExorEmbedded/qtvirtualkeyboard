@@ -6,11 +6,8 @@
 #define DEFAULT_LOCALE "it_IT"
 
 /* Provider for Singleton type */
-QObject * ExorKeyboardSettings::exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
+ExorKeyboardSettings* ExorKeyboardSettings::getInstance()
 {
-    Q_UNUSED(engine)
-    Q_UNUSED(scriptEngine)
-
     static ExorKeyboardSettings *exorKeyboardSettings = NULL;
 
     if (!exorKeyboardSettings)
@@ -18,7 +15,14 @@ QObject * ExorKeyboardSettings::exorKeyboardSettingsProvider(QQmlEngine *engine,
         exorKeyboardSettings = new ExorKeyboardSettings();
     }
 
-    return (QObject *) exorKeyboardSettings;
+    return exorKeyboardSettings;
+}
+
+QObject * ExorKeyboardSettings::exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+    return static_cast<QObject *>(ExorKeyboardSettings::getInstance());
 }
 
 ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :

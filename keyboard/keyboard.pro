@@ -22,13 +22,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         exorkeyboardsettings.cpp \
-        exorvirtualkeyboard.cpp \
+        exorkeyboardpanel.cpp \
+        exorkeyboardwayland.cpp \
         input-method-unstable-v1_p.c \
         main.cpp
 
 HEADERS += \
         exorkeyboardsettings.h \
-        exorvirtualkeyboard.h \
+        exorkeyboardpanel.h \
+        exorkeyboardwayland.h \
         input-method-unstable-v1.h \
         text-input-unstable-v1.h
 
