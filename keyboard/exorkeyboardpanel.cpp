@@ -68,9 +68,9 @@ void ExorKeyboardPanel::initGUI()
 {
     /* QWindow customization */
     setFlags(Qt::Window | Qt::FramelessWindowHint
-        | Qt::WindowStaysOnTopHint /*| Qt::WindowDoesNotAcceptFocus*/);
+        | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus);
 
-    //setWindowState(Qt::WindowNoState);
+    setWindowState(Qt::WindowNoState);
 
     /* QWindow - Background */
     QSurfaceFormat format = this->format();
