@@ -4,7 +4,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
-import QtQuick.VirtualKeyboard 2.4
+import QtQuick.VirtualKeyboard 2.3
 import QtQuick.VirtualKeyboard.Settings 2.0
 
 import com.exor.Keyboard 1.0 as ExorKeyboard

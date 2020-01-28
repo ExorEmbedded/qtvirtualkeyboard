@@ -3,6 +3,8 @@
 import QtQuick 2.0
 import QtQuick.VirtualKeyboard 1.0
 
+import com.exor.Keyboard 1.0 as ExorKeyboard
+
 InputMethod {
 
     function selectionLists() {
@@ -39,7 +41,7 @@ InputMethod {
     function keyEvent(key, text, modifiers) {
         var accept = false
         //console.log("EXOR keyEvent key:" + key + ",text:" + text + ",mod:" + modifiers)
-        accept = ExorVirtualKeyboard.keyEvent(key, text, modifiers)
+        accept = ExorKeyboard.Wayland.keyEvent(key, text, modifiers)
         //console.log("EXOR keyEvent accept:" + accept)
         return accept;
     }

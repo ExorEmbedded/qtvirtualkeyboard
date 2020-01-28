@@ -20,6 +20,7 @@ class ExorKeyboardSettings : public QObject
     Q_PROPERTY(QString locale READ locale)
 
 public:
+    static ExorKeyboardSettings* getInstance();
     static QObject* exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
     QStringList activeLocales();
@@ -27,6 +28,7 @@ public:
 
 private:
     explicit ExorKeyboardSettings(QObject *parent = nullptr);
+
     QStringList m_activeLocales;
     QString m_locale;
 };

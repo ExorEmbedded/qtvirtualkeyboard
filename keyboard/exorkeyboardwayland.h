@@ -1,8 +1,9 @@
-#ifndef EXORVIRTUALKEYBOARD_H
-#define EXORVIRTUALKEYBOARD_H
+#ifndef EXORKEYBOARDWAYLAND_H
+#define EXORKEYBOARDWAYLAND_H
 
-#include <QQuickView>
-#include <QWidget>
+#include <QObject>
+class QQmlEngine;
+class QJSEngine;
 
 #include <string>
 
@@ -10,21 +11,15 @@
 #include "input-method-unstable-v1.h"
 #include "text-input-unstable-v1.h"
 
-class ExorVirtualKeyboard : public QQuickView
+class ExorKeyboardWayland : public QObject
 {
     Q_OBJECT
 
 public:
-
-    /* QObject */
-    explicit ExorVirtualKeyboard();
-    ~ExorVirtualKeyboard();
+    static ExorKeyboardWayland* getInstance();
+    static QObject* exorKeyboardWaylandProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
     Q_INVOKABLE bool keyEvent(Qt::Key, const QString &, Qt::KeyboardModifiers);
-
-    /* Virtual keyboard methods */
-    void showKeyboard();
-    void hideKeyboard();
 
     /* Wayland registry handler */
     void globalHandler(struct wl_registry *wl_registry, uint32_t name,
@@ -56,8 +51,11 @@ public:
     void deleteBeforeCursor();
 
 signals:
+    void activationChanged(bool active);
 
 private:
+    explicit ExorKeyboardWayland(QObject *parent = nullptr);
+
     /* Wayland */
     void waylandConnect();
 
@@ -66,11 +64,10 @@ private:
     struct zwp_input_method_v1 *m_input_method = NULL;
     struct zwp_input_method_context_v1 *m_context = NULL;
 
-    /* QML handlers */
-    void initGUI();
-    QObject *m_inputPanel = NULL;
-
     /* InputMethod Context status */
+    void activateContext(bool active);
+
+    bool m_contextIsActive;
     uint32_t m_serial;
     uint32_t m_content_hint;
     uint32_t m_content_purpose;
@@ -85,4 +82,4 @@ private:
     uint32_t mk_text_direction;
 };
 
-#endif // EXORVIRTUALKEYBOARD_H
+#endif // EXORKEYBOARDWAYLAND_H

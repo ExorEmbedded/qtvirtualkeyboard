@@ -1,16 +1,16 @@
 #include "exorkeyboardsettings.h"
 
+#include <QFile>
 #include <QDBusInterface>
 #include <QDebug>
 
 #define DEFAULT_LOCALE "it_IT"
 
-/* Provider for Singleton type */
-QObject * ExorKeyboardSettings::exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
-{
-    Q_UNUSED(engine)
-    Q_UNUSED(scriptEngine)
+#define KEYBOARD_CONFFILE "/etc/weston/keyboard"
 
+/* Provider for Singleton type */
+ExorKeyboardSettings* ExorKeyboardSettings::getInstance()
+{
     static ExorKeyboardSettings *exorKeyboardSettings = NULL;
 
     if (!exorKeyboardSettings)
@@ -18,7 +18,14 @@ QObject * ExorKeyboardSettings::exorKeyboardSettingsProvider(QQmlEngine *engine,
         exorKeyboardSettings = new ExorKeyboardSettings();
     }
 
-    return (QObject *) exorKeyboardSettings;
+    return exorKeyboardSettings;
+}
+
+QObject * ExorKeyboardSettings::exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+    return static_cast<QObject *>(ExorKeyboardSettings::getInstance());
 }
 
 ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
@@ -26,6 +33,7 @@ ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
     m_activeLocales(QStringList(DEFAULT_LOCALE)),
     m_locale(DEFAULT_LOCALE)
 {
+#if HAVE_DBUS_SETTINGS
     QDBusInterface *iface;
     QVariant reply;
 
@@ -86,6 +94,32 @@ ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
                       " not found in active locales: " << m_activeLocales << ". Add.";
         m_activeLocales << m_locale;
     }
+#else
+
+    QStringList confLayouts;
+
+    QFile confFile(KEYBOARD_CONFFILE);
+    if (confFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream stream(&confFile);
+        QString line = stream.readLine();
+        if (!line.isNull() && line.split(":").size() == 2)
+        {
+            confLayouts = line.split(":");
+            m_locale = confLayouts.at(0);
+            m_activeLocales = confLayouts.at(1).split(",");
+        }
+        else
+        {
+            qWarning() << "Bad line in file: " << KEYBOARD_CONFFILE;
+        }
+    }
+    else
+    {
+        qWarning() << "Bad file: " << KEYBOARD_CONFFILE;
+    }
+
+#endif
 
     qDebug() << "Active locales: " << m_activeLocales;
     qDebug() << "Locale: " << m_locale;
