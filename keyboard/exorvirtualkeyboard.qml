@@ -7,6 +7,8 @@ import QtQuick.Layouts 1.12
 import QtQuick.VirtualKeyboard 2.4
 import QtQuick.VirtualKeyboard.Settings 2.0
 
+import com.exor.Keyboard 1.0 as ExorKeyboard
+
 Item {
     id: window
     visible: true
@@ -16,11 +18,16 @@ Item {
         source: "qrc:/exorim.qml"
     }
 
-    /* Temporary settings - will follow configuration */
+    /* Temporary initialization */
     Binding {
         target: VirtualKeyboardSettings
         property: "locale"
-        value: "en_US"
+        value: "it_IT"
+    }
+    Binding {
+        target: VirtualKeyboardSettings
+        property: "activeLocales"
+        value: ["it_IT"]
     }
 
     /* Helper (hidden) elements */
@@ -63,6 +70,11 @@ Item {
         // The method will set the Exor InputMethod as active.
         // The inputPanel will be activated on success.
         function setCustomInputMethod() {
+
+            // Read settings from DBUS and configure VirtualKeyboard Settings
+            VirtualKeyboardSettings.activeLocales = ExorKeyboard.Settings.activeLocales
+            VirtualKeyboardSettings.locale = null
+            VirtualKeyboardSettings.locale = ExorKeyboard.Settings.locale
 
             //console.log("Try to set: " + ime.item)
             InputContext.inputEngine.inputMethod = ime.item
