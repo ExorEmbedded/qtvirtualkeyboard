@@ -50,6 +50,7 @@ Item {
 
         anchors.top: inputPanel.top
         //anchors.bottom: inputPanel.top
+        anchors.left: inputPanel.left
     }
 
     InputPanel {
@@ -57,9 +58,9 @@ Item {
         objectName: "inputPanel"
         active: false
         z: 99
-        x: 0
+        x: window.width/6
         y: window.height - inputPanel.height
-        width: window.width
+        width: (4*window.width)/6
         visible: true
     }
 
