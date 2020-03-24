@@ -86,7 +86,14 @@ Item {
 
             tfh.forceActiveFocus()
         }
+
+        function updateInputPanel() {
+            // Require settings update, then configure VirtualKeyboardSettings
+            ExorKeyboard.Settings.update()
+
+            VirtualKeyboardSettings.activeLocales = ExorKeyboard.Settings.activeLocales
+            VirtualKeyboardSettings.locale = null
+            VirtualKeyboardSettings.locale = ExorKeyboard.Settings.locale
+        }
     }
-
 }
-

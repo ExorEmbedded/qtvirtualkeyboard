@@ -23,6 +23,8 @@ public:
     static ExorKeyboardSettings* getInstance();
     static QObject* exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
+    Q_INVOKABLE void update();
+
     QStringList activeLocales();
     QString locale();
 

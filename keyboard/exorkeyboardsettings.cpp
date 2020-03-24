@@ -33,6 +33,11 @@ ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
     m_activeLocales(QStringList(DEFAULT_LOCALE)),
     m_locale(DEFAULT_LOCALE)
 {
+    update();
+}
+
+void ExorKeyboardSettings::update()
+{
 #if HAVE_DBUS_SETTINGS
     QDBusInterface *iface;
     QVariant reply;

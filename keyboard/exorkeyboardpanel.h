@@ -15,6 +15,7 @@ private:
     void hidePanel();
     void initGUI();
     QObject *m_inputPanel = NULL;
+    QObject *m_exorImHandler = NULL;
 };
 
 #endif // EXORKEYBOARDPANEL_H

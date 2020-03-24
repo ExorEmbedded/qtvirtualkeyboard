@@ -26,6 +26,11 @@ void ExorKeyboardPanel::activate(bool active)
 
 void ExorKeyboardPanel::showPanel()
 {
+    /* Update settings configuration */
+    if (m_exorImHandler) {
+        QMetaObject::invokeMethod(m_exorImHandler, "updateInputPanel");
+    }
+
     /* Display keyboard */
     show();
 
@@ -97,7 +102,13 @@ void ExorKeyboardPanel::initGUI()
     }
 
     /* Set Exor InputMethod as default IM */
-    QObject *exorIMHandler = findChild<QObject*>("exorIMHandler");
-    QMetaObject::invokeMethod(exorIMHandler, "setCustomInputMethod");
+    m_exorImHandler = findChild<QObject*>("exorIMHandler");
+
+    /* Unlikely */
+    if (!m_exorImHandler) {
+        qDebug() << "showKeyboard error: no exor handler.";
+    } else {
+        QMetaObject::invokeMethod(m_exorImHandler, "setCustomInputMethod");
+    }
     hide();
 }
