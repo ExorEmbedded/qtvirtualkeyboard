@@ -36,5 +36,5 @@ HEADERS += \
 
 RESOURCES += qml.qrc
 
-
-LIBS += -lweston-4 
+CONFIG += link_pkgconfig
+PKGCONFIG += weston
