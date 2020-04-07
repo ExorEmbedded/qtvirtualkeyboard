@@ -111,8 +111,24 @@ void ExorKeyboardSettings::update()
         if (!line.isNull() && line.split(":").size() == 2)
         {
             confLayouts = line.split(":");
-            m_locale = confLayouts.at(0);
-            m_activeLocales = confLayouts.at(1).split(",");
+            QString locale = confLayouts.at(0);
+            QString activeLocales = confLayouts.at(1);
+
+            // Handle empty case: keep previous/original config
+            if (locale.length() > 0)
+            {
+                m_locale = locale;
+            }
+
+            // Current locale needs to be active
+            m_activeLocales.clear();
+            m_activeLocales << m_locale;
+
+            // Handle empty case: nothing to do
+            if (activeLocales.length() > 0)
+            {
+                m_activeLocales << activeLocales.split(",");
+            }
         }
         else
         {
