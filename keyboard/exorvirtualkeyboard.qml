@@ -73,6 +73,7 @@ Item {
         function setCustomInputMethod() {
 
             // Read settings from DBUS and configure VirtualKeyboard Settings
+            VirtualKeyboardSettings.activeLocales = []
             VirtualKeyboardSettings.activeLocales = ExorKeyboard.Settings.activeLocales
             VirtualKeyboardSettings.locale = null
             VirtualKeyboardSettings.locale = ExorKeyboard.Settings.locale
@@ -91,6 +92,7 @@ Item {
             // Require settings update, then configure VirtualKeyboardSettings
             ExorKeyboard.Settings.update()
 
+            VirtualKeyboardSettings.activeLocales = []
             VirtualKeyboardSettings.activeLocales = ExorKeyboard.Settings.activeLocales
             VirtualKeyboardSettings.locale = null
             VirtualKeyboardSettings.locale = ExorKeyboard.Settings.locale
