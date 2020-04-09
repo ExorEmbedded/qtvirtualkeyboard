@@ -80,6 +80,8 @@ private:
     /* Keyboard hints */
     std::string mk_language;
     uint32_t mk_text_direction;
+
+    void keyPressRelease(uint32_t time_u32, uint32_t sym);
 };
 
 #endif // EXORKEYBOARDWAYLAND_H

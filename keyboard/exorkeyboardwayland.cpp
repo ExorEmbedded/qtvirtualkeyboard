@@ -452,6 +452,20 @@ void ExorKeyboardWayland::deleteBeforeCursor()
 }
 
 
+void ExorKeyboardWayland::keyPressRelease(uint32_t time_u32, uint32_t sym)
+{
+    xkb_mod_mask_t mod_mask = 0;
+    zwp_input_method_context_v1_keysym(m_context,
+                                       m_serial, /* */
+                                       time_u32,
+                                       sym, WL_KEYBOARD_KEY_STATE_PRESSED, mod_mask);
+    time_u32 = (uint32_t) time(NULL);
+    zwp_input_method_context_v1_keysym(m_context,
+                                       m_serial, /* */
+                                       time_u32,
+                                       sym, WL_KEYBOARD_KEY_STATE_RELEASED, mod_mask);
+}
+
 /*
  * This method will report back to compositor key event information.
  * Changes:
@@ -466,9 +480,7 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
 
     //qDebug() << "keyEvent " << key << " " << text << " " << modifiers;
 
-    xkb_mod_mask_t mod_mask = 0;
     const char *label = text.toStdString().c_str();
-    uint32_t key_state = WL_KEYBOARD_KEY_STATE_PRESSED;
     uint32_t time_u32 = (uint32_t) time(NULL);
 
     switch (key) {
@@ -485,10 +497,7 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
 
     case Qt::Key_Enter:
         commitPreedit();
-        zwp_input_method_context_v1_keysym(m_context,
-                                           m_serial, /* */
-                                           time_u32,
-                                           XKB_KEY_Return, key_state, mod_mask);
+        keyPressRelease(time_u32, XKB_KEY_Return);
         break;
 
     case Qt::Key_Space:
@@ -498,42 +507,27 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
 
     case Qt::Key_Tab:
         commitPreedit();
-        zwp_input_method_context_v1_keysym(m_context,
-                                           m_serial, /* */
-                                           time_u32,
-                                           XKB_KEY_Tab, key_state, mod_mask);
+        keyPressRelease(time_u32, XKB_KEY_Tab);
         break;
 
     case Qt::Key_Up:
         commitPreedit();
-        zwp_input_method_context_v1_keysym(m_context,
-                                           m_serial, /* */
-                                           time_u32,
-                                           XKB_KEY_Up, key_state, mod_mask);
+        keyPressRelease(time_u32, XKB_KEY_Up);
         break;
 
     case Qt::Key_Left:
         commitPreedit();
-        zwp_input_method_context_v1_keysym(m_context,
-                                           m_serial, /* */
-                                           time_u32,
-                                           XKB_KEY_Left, key_state, mod_mask);
+        keyPressRelease(time_u32, XKB_KEY_Left);
         break;
 
     case Qt::Key_Right:
         commitPreedit();
-        zwp_input_method_context_v1_keysym(m_context,
-                                           m_serial, /* */
-                                           time_u32,
-                                           XKB_KEY_Right, key_state, mod_mask);
+        keyPressRelease(time_u32, XKB_KEY_Right);
         break;
 
     case Qt::Key_Down:
         commitPreedit();
-        zwp_input_method_context_v1_keysym(m_context,
-                                           m_serial, /*  */
-                                           time_u32,
-                                           XKB_KEY_Down, key_state, mod_mask);
+        keyPressRelease(time_u32, XKB_KEY_Down);
         break;
 
     case Qt::Key_Shift:
