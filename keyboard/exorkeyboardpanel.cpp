@@ -6,6 +6,10 @@
 #include <QDebug>
 #include <QScreen>
 
+#include "exordebug.h"
+
+Q_LOGGING_CATEGORY(qExorKeyboardPanel, "exor.keyboard.panel")
+
 ExorKeyboardPanel::ExorKeyboardPanel()
 {
     initGUI();
@@ -18,6 +22,8 @@ ExorKeyboardPanel::ExorKeyboardPanel()
 
 void ExorKeyboardPanel::activate(bool active)
 {
+    qDebug(qExorKeyboardPanel) << Q_FUNC_INFO << "active:" << active;
+
     if (active)
         showPanel();
     else
@@ -26,6 +32,8 @@ void ExorKeyboardPanel::activate(bool active)
 
 void ExorKeyboardPanel::showPanel()
 {
+     qCDebug(qExorKeyboardPanel) << Q_FUNC_INFO;
+
     /* Update settings configuration */
     if (m_exorImHandler) {
         QMetaObject::invokeMethod(m_exorImHandler, "updateInputPanel");
@@ -36,7 +44,7 @@ void ExorKeyboardPanel::showPanel()
 
     /* Unlikely */
     if (!m_inputPanel) {
-        qDebug() << "showKeyboard error: no panel.";
+        qCWarning(qExorKeyboardPanel) << "showKeyboard error: no panel.";
         return;
     }
 
@@ -55,9 +63,10 @@ void ExorKeyboardPanel::showPanel()
 
 void ExorKeyboardPanel::hidePanel()
 {
+    qCDebug(qExorKeyboardPanel) << Q_FUNC_INFO;
     /* Unlikely */
     if (!m_inputPanel) {
-        qDebug() << "hideKeyboard error: no panel.";
+        qCWarning(qExorKeyboardPanel) << "hideKeyboard error: no panel.";
         return;
     }
 
@@ -71,6 +80,7 @@ void ExorKeyboardPanel::hidePanel()
 
 void ExorKeyboardPanel::initGUI()
 {
+    qCDebug(qExorKeyboardPanel) << Q_FUNC_INFO;
     /* QWindow customization */
     setFlags(Qt::Window | Qt::FramelessWindowHint
         | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus);
@@ -106,7 +116,7 @@ void ExorKeyboardPanel::initGUI()
 
     /* Unlikely */
     if (!m_exorImHandler) {
-        qDebug() << "showKeyboard error: no exor handler.";
+        qCWarning(qExorKeyboardPanel) << "showKeyboard error: no exor handler.";
     } else {
         QMetaObject::invokeMethod(m_exorImHandler, "setCustomInputMethod");
     }

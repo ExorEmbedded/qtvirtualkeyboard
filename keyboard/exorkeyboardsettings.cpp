@@ -8,6 +8,10 @@
 
 #define KEYBOARD_CONFFILE "/etc/weston/keyboard"
 
+#include "exordebug.h"
+
+Q_LOGGING_CATEGORY(qExorKeyboardSettings, "exor.keyboard.settings")
+
 /* Provider for Singleton type */
 ExorKeyboardSettings* ExorKeyboardSettings::getInstance()
 {
@@ -38,6 +42,7 @@ ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
 
 void ExorKeyboardSettings::update()
 {
+    qCDebug(qExorKeyboardSettings) << Q_FUNC_INFO;
 #if HAVE_DBUS_SETTINGS
     QDBusInterface *iface;
     QVariant reply;
@@ -47,7 +52,7 @@ void ExorKeyboardSettings::update()
                                QDBusConnection::sessionBus(), this);
     if (!iface->isValid())
     {
-        qWarning() << "Unable to connect to com.exor.EPAD.KeyboardSettings ("
+        qCWarning(qExorKeyboardSettings) << "Unable to connect to com.exor.EPAD.KeyboardSettings ("
                    << QDBusConnection::sessionBus().lastError().message() << ")";
         return;
     }
@@ -66,12 +71,12 @@ void ExorKeyboardSettings::update()
     if (!reply.isNull())
     {
         QString availableLayoutsString = reply.toString();
-        qDebug() << "Received available layouts: " << availableLayoutsString;
+        qCDebug(qExorKeyboardSettings) << "Received available layouts: " << availableLayoutsString;
         m_activeLocales = availableLayoutsString.split(",");
     }
     else
     {
-        qWarning() << "Unable to parse available layouts list "
+        qCWarning(qExorKeyboardSettings) << "Unable to parse available layouts list "
                    << "from com.exor.EPAD.KeyboardSettings. Keep default.";
     }
 
@@ -79,12 +84,12 @@ void ExorKeyboardSettings::update()
     if (!reply.isNull())
     {
         QString currentLayoutString = reply.toString();
-        qDebug() << "Received current layout: " << currentLayoutString;
+        qCDebug(qExorKeyboardSettings) << "Received current layout: " << currentLayoutString;
         m_locale = currentLayoutString;
     }
     else
     {
-        qWarning() << "Unable to parse locale from "
+        qCWarning(qExorKeyboardSettings) << "Unable to parse locale from "
                    << "from com.exor.EPAD.KeyboardSettings. Keep default.";
     }
 
@@ -94,7 +99,7 @@ void ExorKeyboardSettings::update()
      */
     if (-1 == m_activeLocales.indexOf(m_locale))
     {
-        qWarning() <<
+        qCWarning(qExorKeyboardSettings) <<
                       "Locale: " << m_locale <<
                       " not found in active locales: " << m_activeLocales << ". Add.";
         m_activeLocales << m_locale;
@@ -132,18 +137,18 @@ void ExorKeyboardSettings::update()
         }
         else
         {
-            qWarning() << "Bad line in file: " << KEYBOARD_CONFFILE;
+            qCWarning(qExorKeyboardSettings) << "Bad line in file: " << KEYBOARD_CONFFILE;
         }
     }
     else
     {
-        qWarning() << "Bad file: " << KEYBOARD_CONFFILE;
+        qCWarning(qExorKeyboardSettings) << "Bad file: " << KEYBOARD_CONFFILE;
     }
 
 #endif
 
-    qDebug() << "Active locales: " << m_activeLocales;
-    qDebug() << "Locale: " << m_locale;
+    qCDebug(qExorKeyboardSettings) << "Active locales: " << m_activeLocales;
+    qCDebug(qExorKeyboardSettings) << "Locale: " << m_locale;
 }
 
 QStringList ExorKeyboardSettings::activeLocales()

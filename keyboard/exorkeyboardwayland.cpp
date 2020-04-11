@@ -11,6 +11,10 @@
 #include "input-method-unstable-v1.h"
 #include "text-input-unstable-v1.h"
 
+#include "exordebug.h"
+
+Q_LOGGING_CATEGORY(qExorKeyboardWayland, "exor.keyboard.wayland")
+
 /* ************************************************************** */
 
 /*
@@ -228,15 +232,15 @@ ExorKeyboardWayland::ExorKeyboardWayland(QObject *parent) :
 void ExorKeyboardWayland::globalHandler(struct wl_registry *wl_registry, uint32_t name,
                                      const char *interface, uint32_t version)
 {
-    qDebug() << "Wayland: interface [" << name << "] " << interface << " (v" << version << ")";
+    qCDebug(qExorKeyboardWayland) << "Wayland: interface [" << name << "] " << interface << " (v" << version << ")";
 
     if (strcmp(interface, "wl_compositor") == 0) {
-        qDebug() << "Wayland: bind wl_compositor";
+        qCDebug(qExorKeyboardWayland) << "Wayland: bind wl_compositor";
         m_compositor = (struct wl_compositor *) wl_registry_bind(wl_registry, name,
                                         &wl_compositor_interface, 3);
     }
     else if (!strcmp(interface, "zwp_input_method_v1")) {
-        qDebug() << "Wayland: bind zwp_input_method_v1 and add listener";
+        qCDebug(qExorKeyboardWayland) << "Wayland: bind zwp_input_method_v1 and add listener";
         m_input_method = (struct zwp_input_method_v1 *)
                 wl_registry_bind(wl_registry,
                                  name, &zwp_input_method_v1_interface, 1);
@@ -250,7 +254,7 @@ void ExorKeyboardWayland::globalHandler(struct wl_registry *wl_registry, uint32_
 void ExorKeyboardWayland::inputMethodHandleActivate(struct zwp_input_method_v1 *,
                                            struct zwp_input_method_context_v1 *context)
 {
-    qDebug() << "Input method activation request";
+    qCDebug(qExorKeyboardWayland) << "Input method activation request";
 
     if (m_context) {
         zwp_input_method_context_v1_destroy(m_context);
@@ -292,7 +296,7 @@ void ExorKeyboardWayland::inputMethodHandleActivate(struct zwp_input_method_v1 *
 void ExorKeyboardWayland::inputMethodHandleDeactivate(struct zwp_input_method_v1 *,
                                              struct zwp_input_method_context_v1 *)
 {
-    qDebug() << "Input method deactivation request";
+    qCDebug(qExorKeyboardWayland) << "Input method deactivation request";
 
     /* Change activation status -will notify with signal- */
     activateContext(false);
@@ -478,7 +482,9 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
 {
     Q_UNUSED(modifiers)
 
-    //qDebug() << "keyEvent " << key << " " << text << " " << modifiers;
+    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
+             << "keyEvent " << key << " "
+             << text << " " << modifiers;
 
     const char *label = text.toStdString().c_str();
     uint32_t time_u32 = (uint32_t) time(NULL);
@@ -568,7 +574,7 @@ void ExorKeyboardWayland::waylandConnect()
         exit(1);
     }
 
-    qDebug() << "Connected to display: " << wl_display_get_fd(display);
+    qCDebug(qExorKeyboardWayland) << "Connected to display: " << wl_display_get_fd(display);
 
     /* Register callbacks from global registry */
     registry = wl_display_get_registry(display);
@@ -579,6 +585,9 @@ void ExorKeyboardWayland::waylandConnect()
 
  void ExorKeyboardWayland::activateContext(bool active)
  {
+     qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
+              << "active " << active;
+
      if (m_contextIsActive == active)
          return;
 
