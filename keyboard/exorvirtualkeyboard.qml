@@ -42,10 +42,10 @@ Item {
             id: tfh
             objectName: "textFieldHelper"
             focus: false
-            inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
+            inputMethodHints: Qt.ImhDigitsOnly //Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
             height: 30
             width: 100
-            visible: true
+            visible: false
         }
 
         anchors.top: inputPanel.top
@@ -58,11 +58,12 @@ Item {
         objectName: "inputPanel"
         active: false
         z: 99
-        x: window.width/6
+        x: window.width/10
         y: window.height - inputPanel.height
-        width: (4*window.width)/6
+        width: (4*window.width)/5
         visible: true
     }
+
 
     Item {
         id: exorIMHandler
