@@ -57,6 +57,10 @@ void ExorKeyboardPanel::showPanel()
     int width = m_inputPanel->property("width").toInt();
     int height = m_inputPanel->property("height").toInt();
 
+    // Override mask to screen width
+    x = 0;
+    width = qGuiApp->primaryScreen()->geometry().width();
+
     setMask(QRegion(x,y,width,height));
 }
 
