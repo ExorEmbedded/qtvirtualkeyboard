@@ -5,7 +5,7 @@
 class QQmlEngine;
 class QJSEngine;
 
-#include <string>
+#include <QByteArray>
 
 #include <wayland-client.h>
 #include "input-method-unstable-v1.h"
@@ -72,13 +72,13 @@ private:
     uint32_t m_content_hint;
     uint32_t m_content_purpose;
     uint32_t m_preedit_style;
-    char *m_preedit_string = NULL;
-    char *m_preferred_language = NULL;
-    char *m_surrounding_text = NULL;
+    QByteArray m_preedit_string;
+    QByteArray m_preferred_language;
+    QByteArray m_surrounding_text;
     uint32_t m_surrounding_cursor;
 
     /* Keyboard hints */
-    std::string mk_language;
+    QByteArray mk_language;
     uint32_t mk_text_direction;
 
     void keyPressRelease(uint32_t time_u32, uint32_t sym);

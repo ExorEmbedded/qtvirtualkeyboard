@@ -17,47 +17,21 @@ Q_LOGGING_CATEGORY(qExorKeyboardWayland, "exor.keyboard.wayland")
 
 /* ************************************************************** */
 
-/*
- * The following text utilities have been imported from Weston client keyboard.
- * They are kept as plain C static routines and they manage the input context.
- */
-static const char *
-prev_utf8_char(const char *s, const char *p)
+int prevUtf8CharIndex(const QByteArray &array, uint32_t current)
 {
-        for (--p; p >= s; --p) {
-                if ((*p & 0xc0) != 0x80)
-                        return p;
+    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
+                                  << "array" << array
+                                  << "current" << current;
+    int idx = current;
+    while (--idx >=0)
+    {
+        if ((array.at(idx) & 0xc0) != 0x80)
+        {
+            qCDebug(qExorKeyboardWayland) << idx;
+            return idx;
         }
-        return NULL;
-}
-
-static char *
-insert_text(const char *text, uint32_t offset, const char *insert)
-{
-    int tlen = strlen(text), ilen = strlen(insert);
-    char *new_text = (char*) malloc(tlen + ilen + 1);
-
-    memcpy(new_text, text, offset);
-    memcpy(new_text + offset, insert, ilen);
-    memcpy(new_text + offset + ilen, text + offset, tlen - offset);
-    new_text[tlen + ilen] = '\0';
-
-    return new_text;
-}
-
-static char *
-append(char *s1, const char *s2)
-{
-        int len1, len2;
-        char *s;
-
-        len1 = strlen(s1);
-        len2 = strlen(s2);
-        s = (char *) realloc(s1, len1 + len2 + 1);
-        memcpy(s + len1, s2, len2);
-        s[len1 + len2] = '\0';
-
-        return s;
+    }
+    return -1;
 }
 
 /* ************************************************************** */
@@ -224,8 +198,8 @@ ExorKeyboardWayland::ExorKeyboardWayland(QObject *parent) :
     waylandConnect();
 
     /* InputMethod context status  */
-    m_preedit_string = strdup("");
-    m_preferred_language = strdup(mk_language.c_str());
+    m_preedit_string = QByteArray();
+    m_preferred_language = QByteArray(mk_language);
 }
 
 
@@ -260,16 +234,11 @@ void ExorKeyboardWayland::inputMethodHandleActivate(struct zwp_input_method_v1 *
         zwp_input_method_context_v1_destroy(m_context);
     }
 
-    if (m_preedit_string)
-        free(m_preedit_string);
-
-    m_preedit_string = strdup("");
+    m_preedit_string = QByteArray();
     m_content_hint = 0;
     m_content_purpose = 0;
-    free(m_preferred_language);
-    m_preferred_language = NULL;
-    free(m_surrounding_text);
-    m_surrounding_text = NULL;
+    m_preferred_language = QByteArray();
+    m_surrounding_text = QByteArray();
 
     m_serial = 0;
     m_context = context;
@@ -283,7 +252,7 @@ void ExorKeyboardWayland::inputMethodHandleActivate(struct zwp_input_method_v1 *
      */
     zwp_input_method_context_v1_language(m_context,
                                          m_serial,
-                                         mk_language.c_str());
+                                         mk_language);
     zwp_input_method_context_v1_text_direction(m_context,
                                                m_serial,
                                                mk_text_direction);
@@ -306,11 +275,13 @@ void ExorKeyboardWayland::inputMethodHandleDeactivate(struct zwp_input_method_v1
 void ExorKeyboardWayland::inputContextHandlePreferredLanguage(struct zwp_input_method_context_v1 *,
                                                const char *language)
 {
-    if (m_preferred_language)
-        free(m_preferred_language);
-    m_preferred_language = NULL;
-    if (language) {
-        m_preferred_language = strdup(language);
+    if (language)
+    {
+        m_preferred_language = QByteArray(language);
+    }
+    else
+    {
+        m_preferred_language = QByteArray();
     }
 
     /* Will report to QtVirtualKeyboard configuration */
@@ -328,7 +299,7 @@ void ExorKeyboardWayland::inputContextHandleCommitState(struct zwp_input_method_
      */
     zwp_input_method_context_v1_language(m_context,
                                          m_serial,
-                                         mk_language.c_str());
+                                         mk_language);
     zwp_input_method_context_v1_text_direction(m_context,
                                                m_serial,
                                                mk_text_direction);
@@ -337,10 +308,7 @@ void ExorKeyboardWayland::inputContextHandleCommitState(struct zwp_input_method_
 
 void ExorKeyboardWayland::inputContextHandleReset(struct zwp_input_method_context_v1 *)
 {
-    if (strlen(m_preedit_string)) {
-        free(m_preedit_string);
-        m_preedit_string = strdup("");
-    }
+    m_preedit_string = QByteArray();
 }
 
 
@@ -364,18 +332,20 @@ void ExorKeyboardWayland::inputContextHandleInvokeAction(struct zwp_input_method
 void ExorKeyboardWayland::inputContextHandleSurroundingText(struct zwp_input_method_context_v1 *,
                                              const char *text, uint32_t cursor, uint32_t )
 {
-    free(m_surrounding_text);
-    m_surrounding_text = strdup(text);
+    m_surrounding_text = QByteArray(text);
     m_surrounding_cursor = cursor;
 }
 
 
 void ExorKeyboardWayland::commitPreedit()
 {
-    char *surrounding_text;
 
-    if (!m_preedit_string ||
-            strlen(m_preedit_string) == 0)
+    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
+                                  << "m_preedit_string" << m_preedit_string;
+
+    QByteArray surrounding_text;
+
+    if (m_preedit_string.isEmpty())
         return;
 
     zwp_input_method_context_v1_cursor_position(m_context,
@@ -384,31 +354,31 @@ void ExorKeyboardWayland::commitPreedit()
                                               m_serial,
                                               m_preedit_string);
 
-    if (m_surrounding_text) {
-        surrounding_text = insert_text(m_surrounding_text,
-                                       m_surrounding_cursor,
-                                       m_preedit_string);
-        free(m_surrounding_text);
-        m_surrounding_text = surrounding_text;
-        m_surrounding_cursor += strlen(m_preedit_string);
+    if (m_surrounding_text.isEmpty()) {
+        m_surrounding_text = m_preedit_string;
+        m_surrounding_cursor = m_preedit_string.length();
     } else {
-        m_surrounding_text = strdup(m_preedit_string);
-        m_surrounding_cursor = strlen(m_preedit_string);
+        surrounding_text = m_surrounding_text.insert(m_surrounding_cursor,
+                                       m_preedit_string);
+        m_surrounding_text = surrounding_text;
+        m_surrounding_cursor += m_preedit_string.length();
     }
 
-    free(m_preedit_string);
-    m_preedit_string = strdup("");
+    m_preedit_string = QByteArray();
 }
 
 
 void ExorKeyboardWayland::sendPreedit(int32_t cursor)
 {
-    uint32_t index = strlen(m_preedit_string);
+    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
+                                  << "m_preedit_string" << m_preedit_string;
+
+    uint32_t index = m_preedit_string.length();
 
     if (m_preedit_style)
         zwp_input_method_context_v1_preedit_styling(m_context,
                                                     0,
-                                                    strlen(m_preedit_string),
+                                                    m_preedit_string.length(),
                                                     m_preedit_style);
     if (cursor > 0)
         index = cursor;
@@ -424,35 +394,35 @@ void ExorKeyboardWayland::sendPreedit(int32_t cursor)
 
 void ExorKeyboardWayland::deleteBeforeCursor()
 {
-    /* May need QString */
-    const char *start, *end;
+    int start, length;
 
-    if (!m_surrounding_text) {
+    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
+                                  << "m_surrounding_text" << m_surrounding_text << " "
+                                  << "m_surrounding_cursor" << m_surrounding_cursor;
+
+    if (m_surrounding_text.isEmpty()) {
         /* nothing to do */
         return;
     }
 
-    start = prev_utf8_char(m_surrounding_text,
-                           m_surrounding_text + m_surrounding_cursor);
-    if (!start) {
-        /* nothing to do */
+    start = prevUtf8CharIndex(m_surrounding_text, m_surrounding_cursor);
+    if (start < 0)
+    {
         return;
     }
 
-    end = m_surrounding_text + m_surrounding_cursor;
+    length = m_surrounding_cursor - start;
 
     zwp_input_method_context_v1_delete_surrounding_text(m_context,
-                                                        (start - m_surrounding_text) - m_surrounding_cursor,
-                                                        end - start);
+                                                        -length,
+                                                        length);
     zwp_input_method_context_v1_commit_string(m_context,
                                               m_serial,
                                               "");
 
     /* Update surrounding text */
-    m_surrounding_cursor = start - m_surrounding_text;
-    m_surrounding_text[m_surrounding_cursor] = '\0';
-    if (*end)
-        memmove(m_surrounding_text + m_surrounding_cursor, end, strlen(end));
+    m_surrounding_cursor = (uint32_t) start;
+    m_surrounding_text.remove(start, length);
 }
 
 
@@ -486,20 +456,18 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
              << "keyEvent " << key << " "
              << text << " " << modifiers;
 
-    const char *label = text.toStdString().c_str();
     uint32_t time_u32 = (uint32_t) time(NULL);
 
     switch (key) {
 
     case Qt::Key_Backspace:
-        if (strlen(m_preedit_string) == 0) {
+        if (m_preedit_string.isEmpty()) {
             deleteBeforeCursor();
         } else {
-            m_preedit_string[strlen(m_preedit_string) - 1] = '\0';
+            m_preedit_string.chop(1);
             sendPreedit(-1);
         }
         break;
-
 
     case Qt::Key_Enter:
         commitPreedit();
@@ -507,7 +475,7 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
         break;
 
     case Qt::Key_Space:
-        m_preedit_string = append(m_preedit_string, " ");
+        m_preedit_string.append(" ");
         commitPreedit();
         break;
 
@@ -542,7 +510,7 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
         break;
 
     default:
-        m_preedit_string = append(m_preedit_string, label);
+        m_preedit_string.append(text.toUtf8());
         sendPreedit(-1);
         commitPreedit(); //REMOVE ?
         break;
