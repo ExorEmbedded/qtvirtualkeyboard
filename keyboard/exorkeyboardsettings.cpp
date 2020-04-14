@@ -42,7 +42,6 @@ ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
 
 void ExorKeyboardSettings::update()
 {
-    qCDebug(qExorKeyboardSettings) << Q_FUNC_INFO;
 #if HAVE_DBUS_SETTINGS
     QDBusInterface *iface;
     QVariant reply;

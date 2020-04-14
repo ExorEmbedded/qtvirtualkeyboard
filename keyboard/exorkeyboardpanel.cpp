@@ -32,8 +32,6 @@ void ExorKeyboardPanel::activate(bool active)
 
 void ExorKeyboardPanel::showPanel()
 {
-     qCDebug(qExorKeyboardPanel) << Q_FUNC_INFO;
-
     /* Update settings configuration */
     if (m_exorImHandler) {
         QMetaObject::invokeMethod(m_exorImHandler, "updateInputPanel");
@@ -67,7 +65,6 @@ void ExorKeyboardPanel::showPanel()
 
 void ExorKeyboardPanel::hidePanel()
 {
-    qCDebug(qExorKeyboardPanel) << Q_FUNC_INFO;
     /* Unlikely */
     if (!m_inputPanel) {
         qCWarning(qExorKeyboardPanel) << "hideKeyboard error: no panel.";
@@ -84,7 +81,6 @@ void ExorKeyboardPanel::hidePanel()
 
 void ExorKeyboardPanel::initGUI()
 {
-    qCDebug(qExorKeyboardPanel) << Q_FUNC_INFO;
     /* QWindow customization */
     setFlags(Qt::Window | Qt::FramelessWindowHint
         | Qt::WindowStaysOnTopHint | Qt::WindowDoesNotAcceptFocus);

@@ -19,15 +19,11 @@ Q_LOGGING_CATEGORY(qExorKeyboardWayland, "exor.keyboard.wayland")
 
 int prevUtf8CharIndex(const QByteArray &array, uint32_t current)
 {
-    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
-                                  << "array" << array
-                                  << "current" << current;
     int idx = current;
     while (--idx >=0)
     {
         if ((array.at(idx) & 0xc0) != 0x80)
         {
-            qCDebug(qExorKeyboardWayland) << idx;
             return idx;
         }
     }
@@ -206,8 +202,6 @@ ExorKeyboardWayland::ExorKeyboardWayland(QObject *parent) :
 void ExorKeyboardWayland::globalHandler(struct wl_registry *wl_registry, uint32_t name,
                                      const char *interface, uint32_t version)
 {
-    qCDebug(qExorKeyboardWayland) << "Wayland: interface [" << name << "] " << interface << " (v" << version << ")";
-
     if (strcmp(interface, "wl_compositor") == 0) {
         qCDebug(qExorKeyboardWayland) << "Wayland: bind wl_compositor";
         m_compositor = (struct wl_compositor *) wl_registry_bind(wl_registry, name,
@@ -228,8 +222,6 @@ void ExorKeyboardWayland::globalHandler(struct wl_registry *wl_registry, uint32_
 void ExorKeyboardWayland::inputMethodHandleActivate(struct zwp_input_method_v1 *,
                                            struct zwp_input_method_context_v1 *context)
 {
-    qCDebug(qExorKeyboardWayland) << "Input method activation request";
-
     if (m_context) {
         zwp_input_method_context_v1_destroy(m_context);
     }
@@ -265,8 +257,6 @@ void ExorKeyboardWayland::inputMethodHandleActivate(struct zwp_input_method_v1 *
 void ExorKeyboardWayland::inputMethodHandleDeactivate(struct zwp_input_method_v1 *,
                                              struct zwp_input_method_context_v1 *)
 {
-    qCDebug(qExorKeyboardWayland) << "Input method deactivation request";
-
     /* Change activation status -will notify with signal- */
     activateContext(false);
 }
@@ -339,10 +329,6 @@ void ExorKeyboardWayland::inputContextHandleSurroundingText(struct zwp_input_met
 
 void ExorKeyboardWayland::commitPreedit()
 {
-
-    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
-                                  << "m_preedit_string" << m_preedit_string;
-
     QByteArray surrounding_text;
 
     if (m_preedit_string.isEmpty())
@@ -370,9 +356,6 @@ void ExorKeyboardWayland::commitPreedit()
 
 void ExorKeyboardWayland::sendPreedit(int32_t cursor)
 {
-    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
-                                  << "m_preedit_string" << m_preedit_string;
-
     uint32_t index = m_preedit_string.length();
 
     if (m_preedit_style)
@@ -395,10 +378,6 @@ void ExorKeyboardWayland::sendPreedit(int32_t cursor)
 void ExorKeyboardWayland::deleteBeforeCursor()
 {
     int start, length;
-
-    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
-                                  << "m_surrounding_text" << m_surrounding_text << " "
-                                  << "m_surrounding_cursor" << m_surrounding_cursor;
 
     if (m_surrounding_text.isEmpty()) {
         /* nothing to do */
@@ -451,10 +430,6 @@ void ExorKeyboardWayland::keyPressRelease(uint32_t time_u32, uint32_t sym)
 bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::KeyboardModifiers modifiers)
 {
     Q_UNUSED(modifiers)
-
-    qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
-             << "keyEvent " << key << " "
-             << text << " " << modifiers;
 
     uint32_t time_u32 = (uint32_t) time(NULL);
 
@@ -538,11 +513,9 @@ void ExorKeyboardWayland::waylandConnect()
 
     /* Fail on error */
     if (display == NULL) {
-        fprintf(stderr, "Can't connect to display\n");
+        qCWarning(qExorKeyboardWayland) << "Can't connect to display";
         exit(1);
     }
-
-    qCDebug(qExorKeyboardWayland) << "Connected to display: " << wl_display_get_fd(display);
 
     /* Register callbacks from global registry */
     registry = wl_display_get_registry(display);
@@ -551,14 +524,11 @@ void ExorKeyboardWayland::waylandConnect()
     wl_display_roundtrip(display);
 }
 
- void ExorKeyboardWayland::activateContext(bool active)
- {
-     qCDebug(qExorKeyboardWayland) << Q_FUNC_INFO
-              << "active " << active;
+void ExorKeyboardWayland::activateContext(bool active)
+{
+    if (m_contextIsActive == active)
+        return;
 
-     if (m_contextIsActive == active)
-         return;
-
-     m_contextIsActive = active;
-     emit activationChanged(m_contextIsActive);
- }
+    m_contextIsActive = active;
+    emit activationChanged(m_contextIsActive);
+}
