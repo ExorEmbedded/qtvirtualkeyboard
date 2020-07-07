@@ -445,6 +445,7 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
         break;
 
     case Qt::Key_Enter:
+    case Qt::Key_Return:
         commitPreedit();
         keyPressRelease(time_u32, XKB_KEY_Return);
         break;
