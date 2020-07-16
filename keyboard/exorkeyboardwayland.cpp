@@ -440,7 +440,7 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
             deleteBeforeCursor();
         } else {
             m_preedit_string.chop(1);
-            sendPreedit(-1);
+            //sendPreedit(-1);
         }
         break;
 
@@ -487,7 +487,7 @@ bool ExorKeyboardWayland::keyEvent(Qt::Key key, const QString &text, Qt::Keyboar
 
     default:
         m_preedit_string.append(text.toUtf8());
-        sendPreedit(-1);
+        //sendPreedit(-1);
         commitPreedit(); //REMOVE ?
         break;
     }
