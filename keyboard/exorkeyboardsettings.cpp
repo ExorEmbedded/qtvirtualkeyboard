@@ -150,6 +150,30 @@ void ExorKeyboardSettings::update()
     qCDebug(qExorKeyboardSettings) << "Locale: " << m_locale;
 }
 
+void ExorKeyboardSettings::updateLocaleFile(const QString& newLocale)
+{
+   qCDebug(qExorKeyboardSettings) << "Writing new default locale" << newLocale;
+
+   QFile confFile(KEYBOARD_CONFFILE);
+   if (confFile.open(QIODevice::ReadWrite | QIODevice::Text))
+   {
+      QTextStream newConf(&confFile);
+      newConf << newLocale << ":";
+      for(auto it = m_activeLocales.begin(); it != m_activeLocales.end(); it++)
+      {
+         newConf << *it;
+         if( it != m_activeLocales.end()-1 )
+         {
+            newConf << ",";
+         }
+      }
+   }
+   else
+   {
+      qCWarning(qExorKeyboardSettings) << "Bad file: " << KEYBOARD_CONFFILE;
+   }
+}
+
 QStringList ExorKeyboardSettings::activeLocales()
 {
     return m_activeLocales;

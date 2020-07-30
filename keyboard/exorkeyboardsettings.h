@@ -24,6 +24,7 @@ public:
     static QObject* exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
     Q_INVOKABLE void update();
+    Q_INVOKABLE void updateLocaleFile(const QString& newLocale);
 
     QStringList activeLocales();
     QString locale();
