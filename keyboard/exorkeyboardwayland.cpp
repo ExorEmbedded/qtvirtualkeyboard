@@ -320,10 +320,10 @@ void ExorKeyboardWayland::inputContextHandleInvokeAction(struct zwp_input_method
 
 
 void ExorKeyboardWayland::inputContextHandleSurroundingText(struct zwp_input_method_context_v1 *,
-                                             const char *text, uint32_t cursor, uint32_t )
+                                             const char *text, uint32_t cursor, uint32_t anchor)
 {
     m_surrounding_text = QByteArray(text);
-    m_surrounding_cursor = cursor;
+    m_surrounding_cursor = anchor;
 }
 
 
