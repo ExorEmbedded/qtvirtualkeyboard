@@ -58,9 +58,9 @@ Item {
         objectName: "inputPanel"
         active: false
         z: 99
-        x: window.width/10
+        x: window.width > window.height ? window.width/10 : 0
         y: window.height - inputPanel.height
-        width: (4*window.width)/5
+        width: window.width > window.height ? (window.width*4)/5 : window.width
         visible: true
     }
 
