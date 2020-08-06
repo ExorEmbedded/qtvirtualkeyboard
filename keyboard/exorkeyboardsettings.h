@@ -2,6 +2,8 @@
 #define EXORKEYBOARDSETTINGS_H
 
 #include <QObject>
+#include <EPADProxy.h>
+
 class QQmlEngine;
 class QJSEngine;
 
@@ -24,13 +26,17 @@ public:
     static QObject* exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
     Q_INVOKABLE void update();
-    Q_INVOKABLE void updateLocaleFile(const QString& newLocale);
+    Q_INVOKABLE void updateLocale(const QString& newLocale);
 
     QStringList activeLocales();
     QString locale();
 
 private:
     explicit ExorKeyboardSettings(QObject *parent = nullptr);
+    void initEPAD();
+
+    QDBusConnection* m_connection;
+    ComExorEPADInterface* m_epad;
 
     QStringList m_activeLocales;
     QString m_locale;

@@ -26,6 +26,7 @@ SOURCES += \
         exorkeyboardpanel.cpp \
         exorkeyboardwayland.cpp \
         input-method-unstable-v1_p.c \
+        EPADProxy.cpp \
         main.cpp
 
 HEADERS += \
@@ -34,7 +35,8 @@ HEADERS += \
         exorkeyboardpanel.h \
         exorkeyboardwayland.h \
         input-method-unstable-v1.h \
-        text-input-unstable-v1.h
+        text-input-unstable-v1.h \
+        EPADProxy.h
 
 RESOURCES += qml.qrc
 
