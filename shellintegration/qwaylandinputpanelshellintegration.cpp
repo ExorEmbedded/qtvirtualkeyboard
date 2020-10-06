@@ -44,7 +44,11 @@ bool QWaylandInputPanelShellIntegration::initialize(QWaylandDisplay *display)
 QWaylandShellSurface *
 QWaylandInputPanelShellIntegration::createShellSurface(QWaylandWindow *window)
 {
+#if QT_VERSION >= 0x050e00
+    struct zwp_input_panel_surface_v1 *ip_surface = m_panel->get_input_panel_surface(window->wlSurface());
+#else
     struct zwp_input_panel_surface_v1 *ip_surface = m_panel->get_input_panel_surface(window->object());
+#endif
 
     return new QWaylandInputPanelSurface(ip_surface, window);
 }
