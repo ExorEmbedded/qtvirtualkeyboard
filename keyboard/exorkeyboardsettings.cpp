@@ -52,6 +52,7 @@ void ExorKeyboardSettings::initEPAD() {
 		delete m_epad;
 		m_connection = NULL;
 		m_epad = NULL;
+		QDBusConnection::disconnectFromBus(QDBusConnection::systemBus().name());
 	}
 }
 

@@ -15,7 +15,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
 
+#ifdef DEBUG
     ExorDebug::openFile("/var/log/exorvk.log");
+#endif
 
     /* Keyboard backend */
     qmlRegisterSingletonType<ExorKeyboardSettings>("com.exor.Keyboard", 1, 0, "Settings",
