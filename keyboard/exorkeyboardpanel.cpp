@@ -59,9 +59,14 @@ void ExorKeyboardPanel::showPanel()
     x = 0;
     width = qGuiApp->primaryScreen()->geometry().width();
 
-    setMask(QRegion(x,y,width,height));
-}
+    QRegion panelArea = QRegion(x,y,width,height);
 
+    if (panelArea != mask()) {
+	// Reset mask
+	setMask(QRegion());
+	setMask(QRegion(x,y,width,height));
+    }
+}
 
 void ExorKeyboardPanel::hidePanel()
 {
@@ -70,9 +75,6 @@ void ExorKeyboardPanel::hidePanel()
         qCWarning(qExorKeyboardPanel) << "hideKeyboard error: no panel.";
         return;
     }
-
-    /* Reset mask */
-    setMask(QRegion());
 
     /* Hide keyboard */
     hide();

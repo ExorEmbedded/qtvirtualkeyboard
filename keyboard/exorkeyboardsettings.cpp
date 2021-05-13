@@ -36,23 +36,27 @@ ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
     QObject(parent),
     m_activeLocales(QStringList(DEFAULT_LOCALE)),
     m_locale(DEFAULT_LOCALE),
-    m_epad(NULL),
-    m_connection(NULL)
+    m_epad(NULL)
 {
     update();
 }
 
 void ExorKeyboardSettings::initEPAD() {
-	m_connection = new QDBusConnection(QDBusConnection::systemBus());
 
-	m_epad = new ComExorEPADInterface("com.exor.EPAD", "/",  *m_connection);
+	if(!QFile::exists("/var/run/dbus/system_bus_socket"))
+		return;
+
+	if (!QDBusConnection::systemBus().isConnected()) {
+		qWarning() << "Failed to get dbus connection : " << QDBusConnection::systemBus().lastError();
+		return;
+	}
+
+	m_epad = new ComExorEPADInterface("com.exor.EPAD", "/",  QDBusConnection::systemBus());
+
 	if (!m_epad->isValid()) {
-		qWarning() << "Failed to get dbus object / : " << m_connection->lastError();
-		delete m_connection;
+		qWarning() << "Failed to get dbus object / : " << QDBusConnection::systemBus().lastError();
 		delete m_epad;
-		m_connection = NULL;
 		m_epad = NULL;
-		QDBusConnection::disconnectFromBus(QDBusConnection::systemBus().name());
 	}
 }
 
