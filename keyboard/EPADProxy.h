@@ -195,4 +195,26 @@ Q_SIGNALS:
 	void volatileParameterChanged(const QString &key, const QString &value);
 };
 
+/*
+ * Proxy class for interface com.exor.EPAD.NFCReader Prova
+ */
+class ComExorEPADNFCReaderInterface: public QDBusAbstractInterface
+{
+    Q_OBJECT
+public:
+    static inline const char *staticInterfaceName()
+    { return "com.exor.EPAD.NFCReader"; }
+
+    ComExorEPADNFCReaderInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+    ~ComExorEPADNFCReaderInterface();
+
+public Q_SLOTS:
+    QDBusPendingReply<int, QString> readJSON ();
+    QDBusPendingReply<int> start();
+    QDBusPendingReply<int> stop();
+
+Q_SIGNALS:
+    void notifyJSON(const QString &json);
+};
+
 #endif

@@ -15,6 +15,7 @@ TEMPLATE = app
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -27,7 +28,9 @@ SOURCES += \
         exorkeyboardwayland.cpp \
         input-method-unstable-v1_p.c \
         EPADProxy.cpp \
-        main.cpp
+        main.cpp \
+        nfcthread.cpp \
+        epaddbusclient.cpp
 
 HEADERS += \
         exordebug.h \
@@ -36,7 +39,10 @@ HEADERS += \
         exorkeyboardwayland.h \
         input-method-unstable-v1.h \
         text-input-unstable-v1.h \
-        EPADProxy.h
+        EPADProxy.h \
+        nfcthread.h \
+        epaddbusclient.h
+
 
 RESOURCES += qml.qrc
 

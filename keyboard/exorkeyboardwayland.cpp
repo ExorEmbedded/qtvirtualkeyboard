@@ -13,6 +13,8 @@
 
 #include "exordebug.h"
 
+#include "nfcthread.h"
+
 Q_LOGGING_CATEGORY(qExorKeyboardWayland, "exor.keyboard.wayland")
 
 /* ************************************************************** */
@@ -196,8 +198,25 @@ ExorKeyboardWayland::ExorKeyboardWayland(QObject *parent) :
     /* InputMethod context status  */
     m_preedit_string = QByteArray();
     m_preferred_language = QByteArray(mk_language);
+
+
+    qCDebug(qExorKeyboardWayland) <<  "start NFC Thread -1!!! ";
+    m_nfcThread=new NFCThread();
+    connect(m_nfcThread, SIGNAL(nfcAvailable(QString)), this, SLOT(nfcReceived(QString)));
+
+    qCDebug(qExorKeyboardWayland) <<  "start NFC Thread!!! ";
+    m_nfcThread->start();
 }
 
+void ExorKeyboardWayland::nfcReceived(QString nfc)
+{
+    qCDebug(qExorKeyboardWayland) <<  "RECEIVED!!! "<<nfc;
+
+    m_preedit_string = nfc.toLocal8Bit();
+    //sendPreedit(-1);
+    commitPreedit(); //REMOVE ?
+
+}
 
 void ExorKeyboardWayland::globalHandler(struct wl_registry *wl_registry, uint32_t name,
                                      const char *interface, uint32_t version)

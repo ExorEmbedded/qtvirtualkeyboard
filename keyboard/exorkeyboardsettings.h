@@ -35,7 +35,7 @@ private:
     explicit ExorKeyboardSettings(QObject *parent = nullptr);
     void initEPAD();
 
-    ComExorEPADInterface* m_epad;
+    //ComExorEPADInterface* m_epad;
 
     QStringList m_activeLocales;
     QString m_locale;

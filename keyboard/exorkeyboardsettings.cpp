@@ -9,6 +9,7 @@
 #define KEYBOARD_CONFFILE "/etc/weston/keyboard"
 
 #include "exordebug.h"
+#include "epaddbusclient.h"
 
 Q_LOGGING_CATEGORY(qExorKeyboardSettings, "exor.keyboard.settings")
 
@@ -35,17 +36,20 @@ QObject * ExorKeyboardSettings::exorKeyboardSettingsProvider(QQmlEngine *engine,
 ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
     QObject(parent),
     m_activeLocales(QStringList(DEFAULT_LOCALE)),
-    m_locale(DEFAULT_LOCALE),
-    m_epad(NULL)
+    m_locale(DEFAULT_LOCALE)
+    //m_epad(NULL)
 {
     update();
 }
 
-void ExorKeyboardSettings::initEPAD() {
+/*void ExorKeyboardSettings::initEPAD() {
+
+    qDebug() << "Init EPAD";
 
 	if(!QFile::exists("/var/run/dbus/system_bus_socket"))
 		return;
 
+    qDebug() << "Init EPAD 1";
 	if (!QDBusConnection::systemBus().isConnected()) {
 		qWarning() << "Failed to get dbus connection : " << QDBusConnection::systemBus().lastError();
 		return;
@@ -58,11 +62,22 @@ void ExorKeyboardSettings::initEPAD() {
 		delete m_epad;
 		m_epad = NULL;
 	}
-}
+}*/
 
 void ExorKeyboardSettings::update()
 {
-    if ( m_epad == NULL ) {
+
+    EPADDBusClient* client = EPADDBusClient::getInstance();
+    if (!client->initEPAD())
+        return;
+    m_locale = client->getLayout();
+    QString activeLocales = client->getActiveLayouts();
+    m_activeLocales = activeLocales.split(",", QString::SkipEmptyParts);
+
+    qCDebug(qExorKeyboardSettings) << "Active locales: " << m_activeLocales;
+    qCDebug(qExorKeyboardSettings) << "Locale: " << m_locale;
+
+    /*if ( m_epad == NULL ) {
         initEPAD();
         if ( m_epad == NULL )
             return;
@@ -74,12 +89,21 @@ void ExorKeyboardSettings::update()
     m_activeLocales = activeLocales.split(",", QString::SkipEmptyParts);
 
     qCDebug(qExorKeyboardSettings) << "Active locales: " << m_activeLocales;
-    qCDebug(qExorKeyboardSettings) << "Locale: " << m_locale;
+    qCDebug(qExorKeyboardSettings) << "Locale: " << m_locale;*/
 }
 
 void ExorKeyboardSettings::updateLocale(const QString& newLocale)
 {
-    if ( m_epad == NULL ) {
+    EPADDBusClient* client = EPADDBusClient::getInstance();
+    if (!client->initEPAD())
+        return;
+
+    qCDebug(qExorKeyboardSettings) << "Writing new default locale" << newLocale;
+    if ( client->setLayout(newLocale) )
+       qCWarning(qExorKeyboardSettings) << "Failed to set layout";
+
+
+    /*if ( m_epad == NULL ) {
         initEPAD();
         if ( m_epad == NULL )
             return;
@@ -88,7 +112,7 @@ void ExorKeyboardSettings::updateLocale(const QString& newLocale)
    qCDebug(qExorKeyboardSettings) << "Writing new default locale" << newLocale;
 
    if ( m_epad->setSystemParameter("locale/keyboard/layout", newLocale) )
-      qCWarning(qExorKeyboardSettings) << "Failed to set layout";
+      qCWarning(qExorKeyboardSettings) << "Failed to set layout";*/
 
 }
 

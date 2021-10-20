@@ -11,6 +11,8 @@ class QJSEngine;
 #include "input-method-unstable-v1.h"
 #include "text-input-unstable-v1.h"
 
+class NFCThread;
+
 class ExorKeyboardWayland : public QObject
 {
     Q_OBJECT
@@ -53,6 +55,9 @@ public:
 signals:
     void activationChanged(bool active);
 
+public slots:
+    void nfcReceived(QString nfc);
+
 private:
     explicit ExorKeyboardWayland(QObject *parent = nullptr);
 
@@ -82,6 +87,8 @@ private:
     uint32_t mk_text_direction;
 
     void keyPressRelease(uint32_t time_u32, uint32_t sym);
+
+    NFCThread* m_nfcThread;
 };
 
 #endif // EXORKEYBOARDWAYLAND_H
