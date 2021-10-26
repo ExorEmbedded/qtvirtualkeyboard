@@ -37,7 +37,10 @@ void NFCThread::run()
         {
             //Simply check if EPAD interface has been started
             //As we manage only UID, we simply wait for notifyJSON event
-            client->initEPAD();
+            if (client->initEPAD())
+            {
+                client->NFCStart();
+            }
 
             counter = 0;
         }

@@ -6,6 +6,9 @@
 #include <qdbusconnection.h>
 #include <qmutex.h>
 
+#define DBUS_INIT_RETRIES   10
+#define DBUS_INIT_DELAY     1000
+
 class EPADDBusClient:public QObject
 {
     Q_OBJECT
