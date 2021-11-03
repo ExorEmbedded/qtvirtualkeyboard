@@ -39,7 +39,7 @@ void NFCThread::run()
             //As we manage only UID, we simply wait for notifyJSON event
             if (client->initEPAD())
             {
-                client->NFCStart();
+                //client->NFCStart();
             }
 
             counter = 0;
@@ -49,14 +49,14 @@ void NFCThread::run()
     }
 
 
-    qCDebug(qExorKeyboardWaylandNFC) << "Terminated";
+    qCDebug(qExorKeyboardWaylandNFC) << " nfc thread terminated";
     m_running = false;
 }
 
 
 void NFCThread::stop()
 {
-    qCDebug(qExorKeyboardWaylandNFC) << "Stopping...";
+    //qCDebug(qExorKeyboardWaylandNFC) << "Stopping...";
     m_stop = true;
 }
 
@@ -65,7 +65,7 @@ void NFCThread::join()
     while (m_running)
         msleep(NFC_SLEEP_TIME / 2);
 
-    qCDebug(qExorKeyboardWaylandNFC) << "Stopped";
+    //qCDebug(qExorKeyboardWaylandNFC) << "Stopped";
 }
 
 bool NFCThread::isStopped()
@@ -95,7 +95,7 @@ bool NFCThread::readNFC(QString& nfc)
 
 void NFCThread::nfcJSONNotification(const QString& json)
 {
-    qDebug()<<"NFC ARRIVED! "<< json;
+    qCDebug(qExorKeyboardWaylandNFC) << "nfc string notification " << json;
 
     if (json.length() == 0)
         return;

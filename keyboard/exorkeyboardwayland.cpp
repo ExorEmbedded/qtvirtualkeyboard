@@ -200,17 +200,15 @@ ExorKeyboardWayland::ExorKeyboardWayland(QObject *parent) :
     m_preferred_language = QByteArray(mk_language);
 
 
-    qCDebug(qExorKeyboardWayland) <<  "start NFC Thread -1!!! ";
     m_nfcThread=new NFCThread();
     connect(m_nfcThread, SIGNAL(nfcAvailable(QString)), this, SLOT(nfcReceived(QString)));
 
-    qCDebug(qExorKeyboardWayland) <<  "start NFC Thread!!! ";
     m_nfcThread->start();
 }
 
 void ExorKeyboardWayland::nfcReceived(QString nfc)
 {
-    qCDebug(qExorKeyboardWayland) <<  "RECEIVED!!! "<<nfc;
+    qCDebug(qExorKeyboardWayland) <<  "string received "<<nfc;
 
     m_preedit_string = nfc.toLocal8Bit();
     //sendPreedit(-1);

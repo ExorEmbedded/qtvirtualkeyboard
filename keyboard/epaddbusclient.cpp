@@ -1,4 +1,7 @@
+#include <QDebug>
 #include "epaddbusclient.h"
+
+Q_LOGGING_CATEGORY(qEPADDBusClient, "exor.keyboard.dbus")
 
 EPADDBusClient* EPADDBusClient::instance = 0;
 /******************************************************************************
@@ -26,7 +29,7 @@ bool EPADDBusClient::initEPAD()
 
     bool initFail=false;
 
-    qDebug() << "Init EPAD";
+    qCDebug(qEPADDBusClient) << "Init EPAD";
 
     if(!QFile::exists("/var/run/dbus/system_bus_socket"))
         return false;
@@ -39,9 +42,8 @@ bool EPADDBusClient::initEPAD()
     }
 
 
-    //qDebug() << "Init EPAD 1";
     if (!QDBusConnection::systemBus().isConnected()) {
-        qWarning() << "Failed to get dbus connection : " << QDBusConnection::systemBus().lastError();
+        qWarning(qEPADDBusClient) << "Failed to get dbus connection : " << QDBusConnection::systemBus().lastError();
         m_mutex.unlock();
         return false;
     }
@@ -51,7 +53,7 @@ bool EPADDBusClient::initEPAD()
         delete m_epad;
     m_epad = new ComExorEPADInterface("com.exor.EPAD", "/",  QDBusConnection::systemBus());
     if (!m_epad->isValid()) {
-        qWarning() << "Failed to get dbus object / : " << QDBusConnection::systemBus().lastError();
+        qWarning(qEPADDBusClient) << "Failed to get dbus object / : " << QDBusConnection::systemBus().lastError();
         initFail=true;
     }
 
@@ -61,7 +63,7 @@ bool EPADDBusClient::initEPAD()
 
      m_NFCReader = new ComExorEPADNFCReaderInterface("com.exor.EPAD", "/NFCReader", QDBusConnection::systemBus());
     if (!m_NFCReader->isValid()) {
-        qWarning() << "Failed to get dbus object /NFCReader : " << QDBusConnection::systemBus().lastError();
+        qWarning(qEPADDBusClient) << "Failed to get dbus object /NFCReader : " << QDBusConnection::systemBus().lastError();
         initFail=true;
     }
 
@@ -76,7 +78,7 @@ bool EPADDBusClient::initEPAD()
             sysParmReply.waitForFinished();
             if(!sysParmReply.isFinished() || sysParmReply.isError() || !sysParmReply.isValid()){
                 //if something is wrong, retry everything
-                qDebug() << "EPAD Service test failed: consider EPAD offline";
+                qCWarning(qEPADDBusClient) << "EPAD Service test failed: consider EPAD offline";
                 initFail=true;
             }
 
@@ -84,7 +86,7 @@ bool EPADDBusClient::initEPAD()
             nfcReply.waitForFinished();
             if(!nfcReply.isFinished() || nfcReply.isError() || !nfcReply.isValid()){
                 //if something is wrong, retry everything
-                qDebug() << "NFC Service test failed: consider EPAD offline";
+                qCWarning(qEPADDBusClient) << "NFC Service test failed: consider EPAD offline";
                 initFail=true;
             }
 
@@ -108,7 +110,7 @@ bool EPADDBusClient::initEPAD()
     }
     else
     {        
-        qDebug() << "Connect NFCReader notification to EPAD Client ";
+        qCDebug(qEPADDBusClient) << "Connect NFCReader notification to EPAD Client ";
         /* For some reason, connect on nfc interface SIGNAL does not work.
          * Probably it is due to Weston starts before EPAD at startup, but even some retries implementation
          * seems to not affect the implementation.
@@ -198,7 +200,6 @@ quint8 EPADDBusClient::getInfos()
 
 void EPADDBusClient::nfcReceivedNotifyJSON(const QString &json)
 {
-    qDebug()<<"NFC RECEIVED on DBUS CLIENT!";
     emit nfcNewNotification(json);
 }
 
