@@ -66,6 +66,9 @@ void ExorKeyboardPanel::showPanel()
 	setMask(QRegion());
 	setMask(QRegion(x,y,width,height));
     }
+
+    qCDebug(qExorKeyboardPanel) << "set InputMethod visible";
+    QGuiApplication::inputMethod()->setVisible(true);
 }
 
 void ExorKeyboardPanel::hidePanel()

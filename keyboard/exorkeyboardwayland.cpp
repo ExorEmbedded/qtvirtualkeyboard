@@ -199,12 +199,26 @@ ExorKeyboardWayland::ExorKeyboardWayland(QObject *parent) :
     m_preedit_string = QByteArray();
     m_preferred_language = QByteArray(mk_language);
 
+    connect(QGuiApplication::inputMethod(), SIGNAL(visibleChanged()), this, SLOT(hideFromKeyboard()));
 
     m_nfcThread=new NFCThread();
     connect(m_nfcThread, SIGNAL(nfcAvailable(QString)), this, SLOT(nfcReceived(QString)));
 
     m_nfcThread->start();
 }
+
+void ExorKeyboardWayland::hideFromKeyboard()
+{
+    qCDebug(qExorKeyboardWayland) <<  "INPUT Panel onVisbileChanged. IsVisible "<<QGuiApplication::inputMethod()->isVisible();
+    if (!QGuiApplication::inputMethod()->isVisible())
+    {
+        qCDebug(qExorKeyboardWayland) <<  "INPUT Panel onVisbileChanged. HIDE";
+        activateContext(false);
+    }
+
+}
+
+
 
 void ExorKeyboardWayland::nfcReceived(QString nfc)
 {

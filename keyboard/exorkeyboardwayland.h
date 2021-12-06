@@ -57,6 +57,7 @@ signals:
 
 public slots:
     void nfcReceived(QString nfc);
+    void hideFromKeyboard();
 
 private:
     explicit ExorKeyboardWayland(QObject *parent = nullptr);
