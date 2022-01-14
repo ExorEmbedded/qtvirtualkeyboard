@@ -41,7 +41,6 @@ bool EPADDBusClient::initEPAD()
         return true;
     }
 
-
     if (!QDBusConnection::systemBus().isConnected()) {
         qWarning(qEPADDBusClient) << "Failed to get dbus connection : " << QDBusConnection::systemBus().lastError();
         m_mutex.unlock();
@@ -89,6 +88,9 @@ bool EPADDBusClient::initEPAD()
                 qCWarning(qEPADDBusClient) << "NFC Service test failed: consider EPAD offline";
                 initFail=true;
             }
+
+            if (!initFail)
+                break;
 
             QThread::msleep(DBUS_INIT_DELAY);
         }
