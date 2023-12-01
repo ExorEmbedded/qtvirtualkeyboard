@@ -41,3 +41,17 @@ QDBusPendingReply<int>ComExorEPADNFCReaderInterface::stop()
 {
     return asyncCall(QLatin1String("stop"));
 }
+
+//
+// com.exor.EPAD.SystemInfo
+//
+ComExorEPADSystemInfoInterface::ComExorEPADSystemInfoInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
+        : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
+{
+}
+
+QDBusPendingReply<QString> ComExorEPADSystemInfoInterface::infoJSON()
+{
+    QList<QVariant> argumentList;
+    return asyncCallWithArgumentList(QLatin1String("infoJSON"), argumentList);
+}

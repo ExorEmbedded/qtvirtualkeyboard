@@ -61,13 +61,15 @@ Item {
         id: inputPanel
         objectName: "inputPanel"
         active: false
+
         z: 99
-        x: window.width > window.height ? window.width/10 : 0
+        // stretched keyboard in portrait mode or if panel is not large
+        x: (window.width < window.height || !ExorKeyboard.Settings.largeDisplay()) ? 0 : window.width/10;
+        width: (window.width < window.height || !ExorKeyboard.Settings.largeDisplay()) ? window.width : (window.width*4)/5;
         y: window.height - inputPanel.height
-        width: window.width > window.height ? (window.width*4)/5 : window.width
+
         visible: true
     }
-
 
     Item {
         id: exorIMHandler

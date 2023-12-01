@@ -36,7 +36,8 @@ QObject * ExorKeyboardSettings::exorKeyboardSettingsProvider(QQmlEngine *engine,
 ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
     QObject(parent),
     m_activeLocales(QStringList(DEFAULT_LOCALE)),
-    m_locale(DEFAULT_LOCALE)
+    m_locale(DEFAULT_LOCALE),
+    m_displayInches(-1)
     //m_epad(NULL)
 {
     update();
@@ -66,7 +67,6 @@ ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
 
 void ExorKeyboardSettings::update()
 {
-
     EPADDBusClient* client = EPADDBusClient::getInstance();
     if (!client->initEPAD())
         return;
@@ -76,6 +76,21 @@ void ExorKeyboardSettings::update()
 
     qCDebug(qExorKeyboardSettings) << "Active locales: " << m_activeLocales;
     qCDebug(qExorKeyboardSettings) << "Locale: " << m_locale;
+
+    if (m_displayInches == -1) {
+        QString jsonInfo = client->getSystemInfo();
+        qCDebug(qExorKeyboardSettings) << "Info: " << jsonInfo;
+	if (!jsonInfo.isEmpty()) {
+            QJsonDocument json = QJsonDocument::fromJson(jsonInfo.toUtf8());
+            QVariantMap sysInfo = json.toVariant().toMap();
+            if (sysInfo.contains("info")) {
+                QVariantMap info = sysInfo["info"].toMap();
+                if (info.contains("inches"))
+                    m_displayInches = info["inches"].toInt();
+                qCDebug(qExorKeyboardSettings) << "Large? " << largeDisplay();
+            }
+        }
+    }
 
     /*if ( m_epad == NULL ) {
         initEPAD();
@@ -124,4 +139,10 @@ QStringList ExorKeyboardSettings::activeLocales()
 QString ExorKeyboardSettings::locale()
 {
     return m_locale;
+}
+
+// Touch display is considered large for 15 inch upwards
+bool ExorKeyboardSettings::largeDisplay()
+{
+    return (m_displayInches >= 15);
 }

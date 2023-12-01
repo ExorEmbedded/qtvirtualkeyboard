@@ -15,11 +15,11 @@ class EPADDBusClient:public QObject
 public:
     static EPADDBusClient *getInstance();
     bool initEPAD();
-    quint8 getInfos();
     QString NFCRead();
     void NFCStart();
     void NFCStop();
 
+    QString getSystemInfo();
     QString getLayout();
     QString getActiveLayouts();
     int setLayout(const QString& newLayout);
@@ -29,6 +29,7 @@ private:
     EPADDBusClient();  /* singleton class */
     static EPADDBusClient*                  instance;
     ComExorEPADInterface*                   m_epad;
+    ComExorEPADSystemInfoInterface*         m_sysInfo;
     ComExorEPADNFCReaderInterface*          m_NFCReader;
 
     //bool m_nfcStarted;

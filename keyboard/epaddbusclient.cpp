@@ -9,6 +9,7 @@ EPADDBusClient* EPADDBusClient::instance = 0;
  ******************************************************************************/
 EPADDBusClient::EPADDBusClient():
     m_epad(NULL),
+    m_sysInfo(NULL),
     m_NFCReader(NULL)
 
 {
@@ -29,8 +30,6 @@ bool EPADDBusClient::initEPAD()
 
     bool initFail=false;
 
-    qCDebug(qEPADDBusClient) << "Init EPAD";
-
     if(!QFile::exists("/var/run/dbus/system_bus_socket"))
         return false;
 
@@ -47,12 +46,21 @@ bool EPADDBusClient::initEPAD()
         return false;
     }
 
+    qCDebug(qEPADDBusClient) << "Init EPAD!";
 
     if (m_epad!=NULL)
         delete m_epad;
     m_epad = new ComExorEPADInterface("com.exor.EPAD", "/",  QDBusConnection::systemBus());
     if (!m_epad->isValid()) {
         qWarning(qEPADDBusClient) << "Failed to get dbus object / : " << QDBusConnection::systemBus().lastError();
+        initFail=true;
+    }
+
+    if (m_sysInfo!=NULL)
+        delete m_sysInfo;
+    m_sysInfo = new ComExorEPADSystemInfoInterface("com.exor.EPAD", "/SystemInfo",  QDBusConnection::systemBus());
+    if (!m_sysInfo->isValid()) {
+        qWarning(qEPADDBusClient) << "Failed to get dbus object /SystemInfo : " << QDBusConnection::systemBus().lastError();
         initFail=true;
     }
 
@@ -108,6 +116,12 @@ bool EPADDBusClient::initEPAD()
         {
             delete m_epad;
             m_epad = NULL;
+        }
+
+        if (m_sysInfo!=NULL)
+        {
+            delete m_sysInfo;
+            m_sysInfo = NULL;
         }
     }
     else
@@ -171,6 +185,18 @@ QString EPADDBusClient::getLayout()
     return ret;
 }
 
+QString EPADDBusClient::getSystemInfo()
+{
+    QString ret="";
+    m_mutex.lock();
+    if (m_sysInfo==NULL)
+        ret="";
+    else
+        ret=m_sysInfo->infoJSON();
+    m_mutex.unlock();
+    return ret;
+}
+
 QString EPADDBusClient::getActiveLayouts()
 {
     QString ret="";
@@ -191,13 +217,6 @@ int EPADDBusClient::setLayout(const QString& newLayout)
     m_mutex.unlock();
     return ret;
 
-}
-/******************************************************************************
- *** getInfos
- ******************************************************************************/
-quint8 EPADDBusClient::getInfos()
-{
-    return 0;
 }
 
 void EPADDBusClient::nfcReceivedNotifyJSON(const QString &json)

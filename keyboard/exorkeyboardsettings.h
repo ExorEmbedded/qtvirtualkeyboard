@@ -1,6 +1,7 @@
 #ifndef EXORKEYBOARDSETTINGS_H
 #define EXORKEYBOARDSETTINGS_H
 
+#include <QVariantMap>
 #include <QObject>
 #include <EPADProxy.h>
 
@@ -30,6 +31,7 @@ public:
 
     QStringList activeLocales();
     QString locale();
+    Q_INVOKABLE bool largeDisplay();
 
 private:
     explicit ExorKeyboardSettings(QObject *parent = nullptr);
@@ -39,6 +41,7 @@ private:
 
     QStringList m_activeLocales;
     QString m_locale;
+    int m_displayInches;
 };
 
 #endif // EXORKEYBOARDSETTINGS_H

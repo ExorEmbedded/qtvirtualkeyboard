@@ -217,4 +217,15 @@ Q_SIGNALS:
     void notifyJSON(const QString &json);
 };
 
+class ComExorEPADSystemInfoInterface : public QDBusAbstractInterface
+{
+    Q_OBJECT
+public:
+    static inline const char *staticInterfaceName() { return "com.exor.EPAD.SystemInfo"; }
+
+    ComExorEPADSystemInfoInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+
+    QDBusPendingReply<QString> infoJSON();
+};
+
 #endif
