@@ -80,15 +80,15 @@ void ExorKeyboardSettings::update()
     if (m_displayInches == -1) {
         QString jsonInfo = client->getSystemInfo();
         qCDebug(qExorKeyboardSettings) << "Info: " << jsonInfo;
-	if (!jsonInfo.isEmpty()) {
+        if (!jsonInfo.isEmpty()) {
             QJsonDocument json = QJsonDocument::fromJson(jsonInfo.toUtf8());
             QVariantMap sysInfo = json.toVariant().toMap();
-            if (sysInfo.contains("info")) {
-                QVariantMap info = sysInfo["info"].toMap();
-                if (info.contains("inches"))
-                    m_displayInches = info["inches"].toInt();
-                qCDebug(qExorKeyboardSettings) << "Large? " << largeDisplay();
+            if (sysInfo.contains("video")) {
+                QVariantMap video = sysInfo["video"].toMap();
+                if (video.contains("inches"))
+                    m_displayInches = video["inches"].toInt();
             }
+            qCDebug(qExorKeyboardSettings) << "Large? " << largeDisplay();
         }
     }
 
