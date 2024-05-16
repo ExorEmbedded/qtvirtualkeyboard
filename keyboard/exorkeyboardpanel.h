@@ -16,7 +16,6 @@ private:
     void initGUI();
     QObject *m_inputPanel = NULL;
     QObject *m_exorImHandler = NULL;
-    bool m_inited = false;
 };
 
 #endif // EXORKEYBOARDPANEL_H

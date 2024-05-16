@@ -12,8 +12,7 @@ Q_LOGGING_CATEGORY(qExorKeyboardPanel, "exor.keyboard.panel")
 
 ExorKeyboardPanel::ExorKeyboardPanel()
 {
-//    If init is done too early, EPAD's DBus interface is unavailable for panel spec info -> moved to showPanel()
-//    initGUI();
+    initGUI();
 
 //    /* Register QML code backed.
 //     * It is used to report back keyEvents from InputMethod. */
@@ -33,11 +32,6 @@ void ExorKeyboardPanel::activate(bool active)
 
 void ExorKeyboardPanel::showPanel()
 {
-    if (!m_inited) {
-        initGUI();
-        m_inited = true;
-    }
-
     /* Update settings configuration */
     if (m_exorImHandler) {
         QMetaObject::invokeMethod(m_exorImHandler, "updateInputPanel");
