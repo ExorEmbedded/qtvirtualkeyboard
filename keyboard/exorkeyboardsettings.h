@@ -5,6 +5,8 @@
 #include <QObject>
 #include <EPADProxy.h>
 
+#define SETTINGS_RETRY_INTERVAL 3000
+
 class QQmlEngine;
 class QJSEngine;
 
@@ -26,8 +28,8 @@ public:
     static ExorKeyboardSettings* getInstance();
     static QObject* exorKeyboardSettingsProvider(QQmlEngine *engine, QJSEngine *scriptEngine);
 
-    Q_INVOKABLE void update();
-    Q_INVOKABLE void updateLocale(const QString& newLocale);
+    Q_INVOKABLE bool update();
+    Q_INVOKABLE bool updateLocale(const QString& newLocale);
 
     QStringList activeLocales();
     QString locale();
@@ -36,8 +38,6 @@ public:
 private:
     explicit ExorKeyboardSettings(QObject *parent = nullptr);
     void initEPAD();
-
-    //ComExorEPADInterface* m_epad;
 
     QStringList m_activeLocales;
     QString m_locale;

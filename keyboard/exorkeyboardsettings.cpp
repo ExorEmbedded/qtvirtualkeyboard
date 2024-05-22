@@ -38,38 +38,14 @@ ExorKeyboardSettings::ExorKeyboardSettings(QObject *parent) :
     m_activeLocales(QStringList(DEFAULT_LOCALE)),
     m_locale(DEFAULT_LOCALE),
     m_displayInches(-1)
-    //m_epad(NULL)
 {
-    update();
 }
 
-/*void ExorKeyboardSettings::initEPAD() {
-
-    qDebug() << "Init EPAD";
-
-	if(!QFile::exists("/var/run/dbus/system_bus_socket"))
-		return;
-
-    qDebug() << "Init EPAD 1";
-	if (!QDBusConnection::systemBus().isConnected()) {
-		qWarning() << "Failed to get dbus connection : " << QDBusConnection::systemBus().lastError();
-		return;
-	}
-
-	m_epad = new ComExorEPADInterface("com.exor.EPAD", "/",  QDBusConnection::systemBus());
-
-	if (!m_epad->isValid()) {
-		qWarning() << "Failed to get dbus object / : " << QDBusConnection::systemBus().lastError();
-		delete m_epad;
-		m_epad = NULL;
-	}
-}*/
-
-void ExorKeyboardSettings::update()
+bool ExorKeyboardSettings::update()
 {
     EPADDBusClient* client = EPADDBusClient::getInstance();
     if (!client->initEPAD())
-        return;
+        return false;
     m_locale = client->getLayout();
     QString activeLocales = client->getActiveLayouts();
     m_activeLocales = activeLocales.split(",", QString::SkipEmptyParts);
@@ -77,58 +53,39 @@ void ExorKeyboardSettings::update()
     qCDebug(qExorKeyboardSettings) << "Active locales: " << m_activeLocales;
     qCDebug(qExorKeyboardSettings) << "Locale: " << m_locale;
 
-    if (m_displayInches == -1) {
-        QString jsonInfo = client->getSystemInfo();
-        qCDebug(qExorKeyboardSettings) << "Info: " << jsonInfo;
-        if (!jsonInfo.isEmpty()) {
-            QJsonDocument json = QJsonDocument::fromJson(jsonInfo.toUtf8());
-            QVariantMap sysInfo = json.toVariant().toMap();
-            if (sysInfo.contains("video")) {
-                QVariantMap video = sysInfo["video"].toMap();
-                if (video.contains("inches"))
-                    m_displayInches = video["inches"].toInt();
-            }
-            qCDebug(qExorKeyboardSettings) << "Large? " << largeDisplay();
-        }
+    if (m_displayInches != -1)
+        return true;
+
+    QString jsonInfo = client->getSystemInfo();
+    qCDebug(qExorKeyboardSettings) << "Info: " << jsonInfo;
+    if (jsonInfo.isEmpty())
+        return false;
+
+    QJsonDocument json = QJsonDocument::fromJson(jsonInfo.toUtf8());
+    QVariantMap sysInfo = json.toVariant().toMap();
+    if (sysInfo.contains("video")) {
+        QVariantMap video = sysInfo["video"].toMap();
+        if (video.contains("inches"))
+            m_displayInches = video["inches"].toInt();
     }
+    qCDebug(qExorKeyboardSettings) << "Large? " << largeDisplay();
 
-    /*if ( m_epad == NULL ) {
-        initEPAD();
-        if ( m_epad == NULL )
-            return;
-    }
-
-    m_locale = m_epad->getSystemParameter("locale/keyboard/layout");
-
-    QString activeLocales = m_epad->getSystemParameter("locale/keyboard/activeLayouts");
-    m_activeLocales = activeLocales.split(",", QString::SkipEmptyParts);
-
-    qCDebug(qExorKeyboardSettings) << "Active locales: " << m_activeLocales;
-    qCDebug(qExorKeyboardSettings) << "Locale: " << m_locale;*/
+    return true;
 }
 
-void ExorKeyboardSettings::updateLocale(const QString& newLocale)
+bool ExorKeyboardSettings::updateLocale(const QString& newLocale)
 {
     EPADDBusClient* client = EPADDBusClient::getInstance();
     if (!client->initEPAD())
-        return;
+        return false;
 
     qCDebug(qExorKeyboardSettings) << "Writing new default locale" << newLocale;
-    if ( client->setLayout(newLocale) )
+    if ( client->setLayout(newLocale) ) {
        qCWarning(qExorKeyboardSettings) << "Failed to set layout";
-
-
-    /*if ( m_epad == NULL ) {
-        initEPAD();
-        if ( m_epad == NULL )
-            return;
+       return false;
     }
 
-   qCDebug(qExorKeyboardSettings) << "Writing new default locale" << newLocale;
-
-   if ( m_epad->setSystemParameter("locale/keyboard/layout", newLocale) )
-      qCWarning(qExorKeyboardSettings) << "Failed to set layout";*/
-
+    return true;
 }
 
 QStringList ExorKeyboardSettings::activeLocales()

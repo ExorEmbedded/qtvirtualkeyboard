@@ -10,6 +10,9 @@ public:
     ExorKeyboardPanel();
     void activate(bool active);
 
+private slots:
+    void _update();
+
 private:
     void showPanel();
     void hidePanel();

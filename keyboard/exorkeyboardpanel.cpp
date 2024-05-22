@@ -5,8 +5,10 @@
 #include <QQmlContext>
 #include <QDebug>
 #include <QScreen>
+#include <QTimer>
 
 #include "exordebug.h"
+#include "exorkeyboardsettings.h"
 
 Q_LOGGING_CATEGORY(qExorKeyboardPanel, "exor.keyboard.panel")
 
@@ -18,6 +20,34 @@ ExorKeyboardPanel::ExorKeyboardPanel()
 //     * It is used to report back keyEvents from InputMethod. */
 //    QQmlEngine *const engine(this->engine());
 //    engine->rootContext()->setContextProperty("ExorVirtualKeyboard", this);
+
+    _update();
+}
+
+void ExorKeyboardPanel::_update()
+{
+    ExorKeyboardSettings *settings = ExorKeyboardSettings::getInstance();
+
+    if (!settings ||
+            !settings->update()) {
+        qCDebug(qExorKeyboardPanel) << "Rescheduling update";
+        QTimer::singleShot(SETTINGS_RETRY_INTERVAL, this, SLOT(_update()));
+        return;
+    }
+
+    bool large = ExorKeyboardSettings::getInstance()->largeDisplay();
+
+    // only large screens need resizing compared to defaults
+    if (!large)
+        return;
+
+    int w = width();
+    int h = height();
+    qCDebug(qExorKeyboardPanel) << "Resizing to " << w << "x" << h;
+
+    // NOTE: keep aligned with exorvirtualkeyboard.qml implementation
+    m_inputPanel->setProperty("x", w < h ? 0 : w / 10);
+    m_inputPanel->setProperty("width", w < h ? w : (w * 4) / 5);
 }
 
 void ExorKeyboardPanel::activate(bool active)
