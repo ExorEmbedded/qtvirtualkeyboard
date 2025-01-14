@@ -97,12 +97,17 @@ Item {
 
         function updateInputPanel() {
             // Require settings update, then configure VirtualKeyboardSettings
-            ExorKeyboard.Settings.update()
+            if (!ExorKeyboard.Settings.update())
+                return;
 
-            VirtualKeyboardSettings.activeLocales = []
-            VirtualKeyboardSettings.activeLocales = ExorKeyboard.Settings.activeLocales
-            VirtualKeyboardSettings.locale = null
-            VirtualKeyboardSettings.locale = ExorKeyboard.Settings.locale
-        }
+            if (JSON.stringify(VirtualKeyboardSettings.activeLocales) != JSON.stringify(ExorKeyboard.Settings.activeLocales)) {
+                VirtualKeyboardSettings.activeLocales = []
+                VirtualKeyboardSettings.activeLocales = ExorKeyboard.Settings.activeLocales
+            }
+
+            if (VirtualKeyboardSettings.locale != ExorKeyboard.Settings.locale) {
+                VirtualKeyboardSettings.locale = null
+                VirtualKeyboardSettings.locale = ExorKeyboard.Settings.locale
+            }
     }
 }
