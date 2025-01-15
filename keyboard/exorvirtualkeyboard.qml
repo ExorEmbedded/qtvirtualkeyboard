@@ -109,5 +109,6 @@ Item {
                 VirtualKeyboardSettings.locale = null
                 VirtualKeyboardSettings.locale = ExorKeyboard.Settings.locale
             }
+	}
     }
 }
