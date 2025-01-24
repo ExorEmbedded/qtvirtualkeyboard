@@ -56,7 +56,9 @@ Item {
     InputPanel {
         property string locale: InputContext.locale
 
-        onLocaleChanged: ExorKeyboard.Settings.updateLocale(locale)
+        onLocaleChanged: {
+		if (active) ExorKeyboard.Settings.updateLocale(locale)
+	}
 
         id: inputPanel
         objectName: "inputPanel"
