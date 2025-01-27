@@ -13,6 +13,8 @@ Item {
     id: window
     visible: true
 
+    property var inputPanelUpdated: false;
+
     Loader {
         id: ime
         source: "qrc:/exorim.qml"
@@ -57,7 +59,7 @@ Item {
         property string locale: InputContext.locale
 
         onLocaleChanged: {
-		if (active) ExorKeyboard.Settings.updateLocale(locale)
+		if (inputPanelUpdated) ExorKeyboard.Settings.updateLocale(locale)
 	}
 
         id: inputPanel
@@ -111,6 +113,8 @@ Item {
                 VirtualKeyboardSettings.locale = null
                 VirtualKeyboardSettings.locale = ExorKeyboard.Settings.locale
             }
+
+            inputPanelUpdated = true
 	}
     }
 }
