@@ -132,7 +132,11 @@ void ExorKeyboardPanel::initGUI()
      * QWindow - Occupy entire available surface
      * (Wayland InputPanelSurface will slide bottom-up)
      */
-    setGeometry(qGuiApp->primaryScreen()->geometry());
+    // BSP-7881 Due to Wayland optimizations, full-screen windows do not handle
+    // transparent background properly. If the window size is less than the screen size
+    // by just 1 pixel, transparent background is handled properly
+    QRect screenGeometry = qGuiApp->primaryScreen()->geometry(); 
+    setGeometry(0, 1, screenGeometry.width(), screenGeometry.height()-1);
     setResizeMode(QQuickView::SizeRootObjectToView);
 
     /* QQuickView content */
