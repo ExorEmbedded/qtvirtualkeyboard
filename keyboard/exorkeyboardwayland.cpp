@@ -213,7 +213,7 @@ void ExorKeyboardWayland::hideFromKeyboard()
     if (!QGuiApplication::inputMethod()->isVisible())
     {
         qCDebug(qExorKeyboardWayland) <<  "INPUT Panel onVisbileChanged. HIDE";
-        activateContext(false);
+        zwp_input_method_context_v1_deactivate(m_context);
     }
 
 }
